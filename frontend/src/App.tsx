@@ -1,12 +1,22 @@
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Router, Cpu, BarChart4, Network, Bell, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, Router, Cpu, BarChart4, Network, Bell, HelpCircle, Activity, ScatterChart, Sliders } from 'lucide-react';
 import { FilterBar } from './components/FilterBar';
 import { DashboardView } from './components/DashboardView';
 import { RouterTable } from './components/RouterTable';
 import { RouterDetailsView } from './components/RouterDetailsView';
 import { CopilotView } from './components/CopilotView';
 
-type Page = 'dashboard' | 'routers' | 'router-detail' | 'copilot' | 'analytics';
+import { MetricCards } from './components/MetricCards';
+import { HealthDistributionChart } from './components/HealthDistributionChart';
+import { DemoModeBanner } from './components/DemoModeBanner';
+import { PredictedDegradationTable } from './components/PredictedDegradationTable';
+import { FleetPatternsSection } from './components/FleetPatternsSection';
+import { ModelTrainingPage } from './components/ModelTrainingPage';
+import { RouterDetailModal } from './components/RouterDetailModal';
+import { fetchFleetKpis, fetchRoutersRanking } from './api/client';
+import type { FleetKpis as PredictiveKpis, RouterSummary as PredictiveRouterSummary } from './types';
+
+type Page = 'dashboard' | 'routers' | 'router-detail' | 'copilot' | 'analytics' | 'predictive-ops' | 'predictive-patterns' | 'predictive-model';
 
 interface AnalyticsViewProps {
   onRouterSelect: (routerId: string) => void;
@@ -161,9 +171,100 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ onRouterSelect }) => {
   );
 };
 
+interface PredictiveOpsViewProps {
+  onRouterSelect: (routerId: string) => void;
+}
+
+const PredictiveOpsView: React.FC<PredictiveOpsViewProps> = ({ onRouterSelect }) => {
+  const [kpis, setKpis] = useState<PredictiveKpis | null>(null);
+  const [routers, setRouters] = useState<PredictiveRouterSummary[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  // Filters & Sorting
+  const [filterStatus, setFilterStatus] = useState<string>('ALL');
+  const [filterBuilding, setFilterBuilding] = useState<string>('ALL');
+  const [filterRisk, setFilterRisk] = useState<string>('ALL');
+  const [sortBy, setSortBy] = useState<string>('priority');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [kpiData, rankingData] = await Promise.all([
+        fetchFleetKpis(),
+        fetchRoutersRanking({
+          filterStatus: filterStatus !== 'ALL' ? filterStatus : undefined,
+          filterBuilding: filterBuilding !== 'ALL' ? filterBuilding : undefined,
+          filterRisk: filterRisk !== 'ALL' ? filterRisk : undefined,
+          sortBy: sortBy,
+        }),
+      ]);
+      setKpis(kpiData);
+      setRouters(rankingData);
+    } catch (err) {
+      console.error('Failed to load fleet data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [filterStatus, filterBuilding, filterRisk, sortBy]);
+
+  const filteredRouters = routers.filter((r) => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    return (
+      r.router_id.toLowerCase().includes(term) ||
+      r.model.toLowerCase().includes(term) ||
+      r.building.toLowerCase().includes(term) ||
+      r.firmware_version.toLowerCase().includes(term) ||
+      r.recommended_action.toLowerCase().includes(term)
+    );
+  });
+
+  if (loading && !kpis) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 flex flex-col gap-2">
+      <div>
+        <h2 className="text-xl font-bold text-slate-100">Predictive Operations Center</h2>
+        <p className="text-xs text-slate-400 font-medium">Real-time XGBoost forecasts, user-impact analysis, and early warnings</p>
+      </div>
+
+      <DemoModeBanner onSelectRouter={onRouterSelect} />
+      <MetricCards kpis={kpis} />
+      <HealthDistributionChart kpis={kpis} />
+      
+      <PredictedDegradationTable
+        routers={filteredRouters}
+        onSelectRouter={onRouterSelect}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
+        filterBuilding={filterBuilding}
+        setFilterBuilding={setFilterBuilding}
+        filterRisk={filterRisk}
+        setFilterRisk={setFilterRisk}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+      />
+    </div>
+  );
+};
+
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [selectedRouterId, setSelectedRouterId] = useState<string>('');
+  const [selectedPredictiveRouter, setSelectedPredictiveRouter] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     building: '',
     firmware: '',
@@ -260,6 +361,37 @@ function App() {
               <BarChart4 size={18} />
               <span>Fleet Analytics</span>
             </button>
+
+            {/* Divider */}
+            <div className="mx-4 my-2 border-t border-slate-800/40"></div>
+            <div className="px-4 py-1 text-[9px] uppercase font-bold text-slate-500 tracking-wider">Predictive ML Suite</div>
+
+            {/* Predictive Operations Link */}
+            <button
+              onClick={() => navigateToPage('predictive-ops')}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${currentPage === 'predictive-ops' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}
+            >
+              <Activity size={18} />
+              <span>Predictive Operations</span>
+            </button>
+
+            {/* Systemic Patterns Link */}
+            <button
+              onClick={() => navigateToPage('predictive-patterns')}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${currentPage === 'predictive-patterns' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}
+            >
+              <ScatterChart size={18} />
+              <span>Systemic Patterns</span>
+            </button>
+
+            {/* XGBoost Performance Link */}
+            <button
+              onClick={() => navigateToPage('predictive-model')}
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${currentPage === 'predictive-model' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}
+            >
+              <Sliders size={18} />
+              <span>XGBoost Diagnostics</span>
+            </button>
           </nav>
         </div>
 
@@ -283,6 +415,9 @@ function App() {
               {currentPage === 'router-detail' && 'Device Diagnostics Control'}
               {currentPage === 'copilot' && 'NetSentinel Intelligent Assistant'}
               {currentPage === 'analytics' && 'Fleet Intelligence Analysis'}
+              {currentPage === 'predictive-ops' && 'Predictive ML Operations'}
+              {currentPage === 'predictive-patterns' && 'Systemic Anomaly Patterns'}
+              {currentPage === 'predictive-model' && 'XGBoost Performance Diagnostics'}
             </h1>
             <div className="flex items-center gap-3">
               <div className="relative cursor-pointer bg-slate-900 border border-slate-800 hover:border-slate-700 p-2 rounded-lg text-slate-400 hover:text-slate-200">
@@ -342,8 +477,24 @@ function App() {
           {currentPage === 'copilot' && <CopilotView />}
 
           {currentPage === 'analytics' && <AnalyticsView onRouterSelect={handleRouterSelect} />}
+
+          {currentPage === 'predictive-ops' && (
+            <PredictiveOpsView onRouterSelect={(id) => setSelectedPredictiveRouter(id)} />
+          )}
+
+          {currentPage === 'predictive-patterns' && <FleetPatternsSection />}
+
+          {currentPage === 'predictive-model' && <ModelTrainingPage />}
         </main>
       </div>
+
+      {/* 360 Diagnostic Modal */}
+      {selectedPredictiveRouter && (
+        <RouterDetailModal
+          routerId={selectedPredictiveRouter}
+          onClose={() => setSelectedPredictiveRouter(null)}
+        />
+      )}
     </div>
   );
 }
