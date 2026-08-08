@@ -8,6 +8,159 @@ import { CopilotView } from './components/CopilotView';
 
 type Page = 'dashboard' | 'routers' | 'router-detail' | 'copilot' | 'analytics';
 
+interface AnalyticsViewProps {
+  onRouterSelect: (routerId: string) => void;
+}
+
+const AnalyticsView: React.FC<AnalyticsViewProps> = ({ onRouterSelect }) => {
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:8000/api/analytics')
+      .then((res) => res.json())
+      .then((data) => {
+        setAnalytics(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading || !analytics) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h2 className="text-xl font-bold text-slate-100">Network Fleet Analytics</h2>
+        <p className="text-xs text-slate-400">Deep aggregated analysis of firmware cohorts, model loads, and maintenance prioritization</p>
+      </div>
+
+      {/* IT Priority Intervention Queue */}
+      <div className="glass-panel p-5 flex flex-col gap-4">
+        <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-300">Urgent IT Intervention Queue (Priority-Score Rank)</h3>
+          <span className="text-xs bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded border border-rose-500/20 font-medium">
+            Sorted by User-Impact & Telemetry Severity
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr className="border-b border-slate-800 text-xs text-slate-400 font-semibold uppercase bg-slate-900/40">
+                <th className="py-2.5 px-3">Priority Rank</th>
+                <th className="py-2.5 px-3">Router ID</th>
+                <th className="py-2.5 px-3">Building Location</th>
+                <th className="py-2.5 px-3">Status</th>
+                <th className="py-2.5 px-3">Affected Users (Devices)</th>
+                <th className="py-2.5 px-3">Priority Score</th>
+                <th className="py-2.5 px-3">Evidence strength</th>
+              </tr>
+            </thead>
+            <tbody>
+              {analytics.prioritized_interventions.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-8 text-center text-slate-500">
+                    All systems operating within normal boundaries. No active interventions.
+                  </td>
+                </tr>
+              ) : (
+                analytics.prioritized_interventions.map((p: any, idx: number) => (
+                  <tr
+                    key={p.router_id}
+                    onClick={() => onRouterSelect(p.router_id)}
+                    className="border-b border-slate-800/40 hover:bg-slate-900/35 transition-colors cursor-pointer"
+                  >
+                    <td className="py-3 px-3 text-slate-400 font-medium">{idx + 1}</td>
+                    <td className="py-3 px-3 font-semibold text-emerald-400">{p.router_id}</td>
+                    <td className="py-3 px-3 text-slate-300">
+                      {p.building.replace('-', ' ')} <span className="text-slate-500">({p.room})</span>
+                    </td>
+                    <td className="py-3 px-3">
+                      <span className="text-xs bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-semibold uppercase">
+                        {p.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-3 text-slate-300 font-medium">{p.affected_users} devices</td>
+                    <td className="py-3 px-3 font-bold text-slate-200">{p.priority_score.toFixed(1)}</td>
+                    <td className="py-3 px-3 text-slate-400 font-medium">{p.evidence_strength}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Building & Model Summaries */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Building Incident rates */}
+        <div className="glass-panel p-5 flex flex-col gap-4">
+          <h3 className="text-sm font-semibold text-slate-300">Building Performance Statistics</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase">
+                  <th className="py-2">Building</th>
+                  <th className="py-2">Total</th>
+                  <th className="py-2">Critical</th>
+                  <th className="py-2">Critical Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analytics.building_performance.map((b: any) => (
+                  <tr key={b.building} className="border-b border-slate-800/40">
+                    <td className="py-2.5 font-medium text-slate-200">{b.building.replace('-', ' ')}</td>
+                    <td className="py-2.5 text-slate-400">{b.total}</td>
+                    <td className="py-2.5 text-slate-400">{b.critical}</td>
+                    <td className="py-2.5 text-slate-200 font-semibold">{b.critical_rate.toFixed(1)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Model failure ratios */}
+        <div className="glass-panel p-5 flex flex-col gap-4">
+          <h3 className="text-sm font-semibold text-slate-300">Model Deployment Load Profiles</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase">
+                  <th className="py-2">Model</th>
+                  <th className="py-2">Total</th>
+                  <th className="py-2">Critical</th>
+                  <th className="py-2">Critical Rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {analytics.model_performance.map((m: any) => (
+                  <tr key={m.model} className="border-b border-slate-800/40">
+                    <td className="py-2.5 font-medium text-slate-200">{m.model}</td>
+                    <td className="py-2.5 text-slate-400">{m.total}</td>
+                    <td className="py-2.5 text-slate-400">{m.critical}</td>
+                    <td className="py-2.5 text-slate-200 font-semibold">{m.critical_rate.toFixed(1)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [selectedRouterId, setSelectedRouterId] = useState<string>('');
@@ -55,152 +208,7 @@ function App() {
 
   // Fleet Analytics Panel View Component
   const renderAnalyticsView = () => {
-    const [analytics, setAnalytics] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-      fetch('http://localhost:8000/api/analytics')
-        .then((res) => res.json())
-        .then((data) => {
-          setAnalytics(data);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error(err);
-          setLoading(false);
-        });
-    }, []);
-
-    if (loading || !analytics) {
-      return (
-        <div className="flex items-center justify-center h-96">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex flex-col gap-6">
-        <div>
-          <h2 className="text-xl font-bold text-slate-100">Network Fleet Analytics</h2>
-          <p className="text-xs text-slate-400">Deep aggregated analysis of firmware cohorts, model loads, and maintenance prioritization</p>
-        </div>
-
-        {/* IT Priority Intervention Queue */}
-        <div className="glass-panel p-5 flex flex-col gap-4">
-          <div className="border-b border-slate-800 pb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-slate-300">Urgent IT Intervention Queue (Priority-Score Rank)</h3>
-            <span className="text-xs bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded border border-rose-500/20 font-medium">
-              Sorted by User-Impact & Telemetry Severity
-            </span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead>
-                <tr className="border-b border-slate-800 text-xs text-slate-400 font-semibold uppercase bg-slate-900/40">
-                  <th className="py-2.5 px-3">Priority Rank</th>
-                  <th className="py-2.5 px-3">Router ID</th>
-                  <th className="py-2.5 px-3">Building Location</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3">Affected Users (Devices)</th>
-                  <th className="py-2.5 px-3">Priority Score</th>
-                  <th className="py-2.5 px-3">Evidence strength</th>
-                </tr>
-              </thead>
-              <tbody>
-                {analytics.prioritized_interventions.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-8 text-center text-slate-500">
-                      All systems operating within normal boundaries. No active interventions.
-                    </td>
-                  </tr>
-                ) : (
-                  analytics.prioritized_interventions.map((p: any, idx: number) => (
-                    <tr
-                      key={p.router_id}
-                      onClick={() => handleRouterSelect(p.router_id)}
-                      className="border-b border-slate-800/40 hover:bg-slate-900/35 transition-colors cursor-pointer"
-                    >
-                      <td className="py-3 px-3 text-slate-400 font-medium">{idx + 1}</td>
-                      <td className="py-3 px-3 font-semibold text-emerald-400">{p.router_id}</td>
-                      <td className="py-3 px-3 text-slate-300">
-                        {p.building.replace('-', ' ')} <span className="text-slate-500">({p.room})</span>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className="text-xs bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded font-semibold uppercase">
-                          {p.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-slate-300 font-medium">{p.affected_users} devices</td>
-                      <td className="py-3 px-3 font-bold text-slate-200">{p.priority_score.toFixed(1)}</td>
-                      <td className="py-3 px-3 text-slate-400 font-medium">{p.evidence_strength}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Building & Model Summaries */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Building Incident rates */}
-          <div className="glass-panel p-5 flex flex-col gap-4">
-            <h3 className="text-sm font-semibold text-slate-300">Building Performance Statistics</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase">
-                    <th className="py-2">Building</th>
-                    <th className="py-2">Total</th>
-                    <th className="py-2">Critical</th>
-                    <th className="py-2">Critical Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {analytics.building_performance.map((b: any) => (
-                    <tr key={b.building} className="border-b border-slate-800/40">
-                      <td className="py-2.5 font-medium text-slate-200">{b.building.replace('-', ' ')}</td>
-                      <td className="py-2.5 text-slate-400">{b.total}</td>
-                      <td className="py-2.5 text-slate-400">{b.critical}</td>
-                      <td className="py-2.5 text-slate-200 font-semibold">{b.critical_rate.toFixed(1)}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Model failure ratios */}
-          <div className="glass-panel p-5 flex flex-col gap-4">
-            <h3 className="text-sm font-semibold text-slate-300">Model Deployment Load Profiles</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase">
-                    <th className="py-2">Model</th>
-                    <th className="py-2">Total</th>
-                    <th className="py-2">Critical</th>
-                    <th className="py-2">Critical Rate</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {analytics.model_performance.map((m: any) => (
-                    <tr key={m.model} className="border-b border-slate-800/40">
-                      <td className="py-2.5 font-medium text-slate-200">{m.model}</td>
-                      <td className="py-2.5 text-slate-400">{m.total}</td>
-                      <td className="py-2.5 text-slate-400">{m.critical}</td>
-                      <td className="py-2.5 text-slate-200 font-semibold">{m.critical_rate.toFixed(1)}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <AnalyticsView onRouterSelect={handleRouterSelect} />;
   };
 
   return (
