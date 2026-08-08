@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
-import { Activity, ShieldAlert, Heart, ClipboardList, AlertTriangle } from 'lucide-react';
+import { Activity, ShieldAlert, Heart, ClipboardList, AlertTriangle, Upload, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface RouterSummary {
   rank: number;
@@ -51,6 +51,9 @@ const STATUS_COLORS = {
 export const DashboardView: React.FC<DashboardViewProps> = ({ filters, onRouterSelect }) => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState<{ success: boolean; message: string } | null>(null);
+  const [reloadTrigger, setReloadTrigger] = useState(0);
 
   useEffect(() => {
     setLoading(true);
@@ -71,7 +74,40 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ filters, onRouterS
         console.error('Error loading dashboard:', err);
         setLoading(false);
       });
-  }, [filters]);
+  }, [filters, reloadTrigger]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'metrics' | 'routers') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadStatus(null);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/upload/${type}`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        setUploadStatus({ success: true, message: result.message });
+        setReloadTrigger((prev) => prev + 1); // Trigger data reload
+      } else {
+        setUploadStatus({ success: false, message: result.detail || 'Upload failed' });
+      }
+    } catch (err) {
+      console.error(err);
+      setUploadStatus({ success: false, message: 'Network error occurred during upload.' });
+    } finally {
+      setUploading(false);
+      // Reset input value so same file can be uploaded again
+      e.target.value = '';
+    }
+  };
 
   if (loading || !data) {
     return (
@@ -139,6 +175,57 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ filters, onRouterS
           <div>
             <div className="text-xs text-slate-400 font-medium">Critical</div>
             <div className="text-2xl font-bold text-rose-400">{summary.critical_count}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Live Telemetry Upload Panel */}
+      <div className="glass-panel p-5 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-900/20 border-slate-800/80">
+        <div className="flex flex-col gap-1">
+          <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+            <Upload size={16} className="text-emerald-400" />
+            Live Telemetry Data Intake
+          </h3>
+          <p className="text-xs text-slate-400">
+            Upload new telemetry CSV (metrics) or device lists (routers) to recalculate campus-wide health scores.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
+          {/* Upload Status Banner */}
+          {uploadStatus && (
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border ${uploadStatus.success ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
+              {uploadStatus.success ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
+              <span className="max-w-[200px] truncate" title={uploadStatus.message}>{uploadStatus.message}</span>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            {/* Upload Metrics Button */}
+            <label className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${uploading ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed' : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700 hover:text-slate-100'}`}>
+              <Upload size={14} />
+              <span>Upload Metrics CSV</span>
+              <input 
+                type="file" 
+                accept=".csv" 
+                onChange={(e) => handleFileUpload(e, 'metrics')} 
+                disabled={uploading} 
+                className="hidden" 
+              />
+            </label>
+
+            {/* Upload Routers Button */}
+            <label className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${uploading ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed' : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700 hover:text-slate-100'}`}>
+              <Upload size={14} />
+              <span>Upload Routers CSV</span>
+              <input 
+                type="file" 
+                accept=".csv" 
+                onChange={(e) => handleFileUpload(e, 'routers')} 
+                disabled={uploading} 
+                className="hidden" 
+              />
+            </label>
           </div>
         </div>
       </div>
