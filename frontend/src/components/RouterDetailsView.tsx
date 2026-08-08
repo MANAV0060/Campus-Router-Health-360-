@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { ArrowLeft, Cpu, Wrench, RefreshCw, Layers, TrendingUp, BarChart3, AlertCircle } from 'lucide-react';
+import { API_BASE_URL } from '../api/config';
 
 interface RouterDetailsViewProps {
   routerId: string;
@@ -97,13 +98,13 @@ export const RouterDetailsView: React.FC<RouterDetailsViewProps> = ({ routerId, 
 
   useEffect(() => {
     // 1. Fetch router evidence
-    fetch(`http://localhost:8000/api/routers/${routerId}/evidence`)
+    fetch(`${API_BASE_URL}/routers/${routerId}/evidence`)
       .then((res) => res.json())
       .then((data) => setEvidence(data))
       .catch((err) => console.error('Error fetching evidence:', err));
 
     // 2. Fetch history for charts
-    fetch(`http://localhost:8000/api/routers/${routerId}/history`)
+    fetch(`${API_BASE_URL}/routers/${routerId}/history`)
       .then((res) => res.json())
       .then((data) => setHistory(data.history))
       .catch((err) => console.error('Error fetching history:', err));
@@ -112,7 +113,7 @@ export const RouterDetailsView: React.FC<RouterDetailsViewProps> = ({ routerId, 
     setDiagnosis(null);
 
     // 4. Fetch all routers for comparison dropdown
-    fetch('http://localhost:8000/api/routers?limit=100')
+    fetch(`${API_BASE_URL}/routers?limit=100`)
       .then((res) => res.json())
       .then((data) => {
         setAllRouters(data.routers.filter((r: any) => r.router_id !== routerId));
@@ -126,7 +127,7 @@ export const RouterDetailsView: React.FC<RouterDetailsViewProps> = ({ routerId, 
       return;
     }
     // Fetch details of router to compare
-    fetch(`http://localhost:8000/api/routers/${compareRouterId}`)
+    fetch(`${API_BASE_URL}/routers/${compareRouterId}`)
       .then((res) => res.json())
       .then((data) => {
         setCompareDetails({
@@ -149,7 +150,7 @@ export const RouterDetailsView: React.FC<RouterDetailsViewProps> = ({ routerId, 
 
   const requestDiagnosis = () => {
     setLoadingDiagnosis(true);
-    fetch(`http://localhost:8000/api/routers/${routerId}/diagnosis`)
+    fetch(`${API_BASE_URL}/routers/${routerId}/diagnosis`)
       .then((res) => res.json())
       .then((data) => {
         setDiagnosis(data);

@@ -3,7 +3,7 @@
 import os
 
 # Port and server options
-PORT = 8000
+PORT = int(os.environ.get("PORT", 8000))
 HOST = "0.0.0.0"
 
 # Files path

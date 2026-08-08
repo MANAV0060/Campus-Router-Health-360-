@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Search, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
+import { API_BASE_URL } from '../api/config';
 
 interface RouterListResponse {
   total: number;
@@ -72,7 +73,7 @@ export const RouterTable: React.FC<RouterTableProps> = ({ filters, onRouterSelec
     if (filters.status) params.append('status', filters.status);
     if (search) params.append('search', search);
 
-    fetch(`http://localhost:8000/api/routers?${params.toString()}`)
+    fetch(`${API_BASE_URL}/routers?${params.toString()}`)
       .then((res) => res.json())
       .then((resData) => {
         setData(resData);

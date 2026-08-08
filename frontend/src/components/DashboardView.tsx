@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
 import { Activity, ShieldAlert, Heart, ClipboardList, AlertTriangle, Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { API_BASE_URL } from '../api/config';
 
 interface RouterSummary {
   rank: number;
@@ -64,7 +65,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ filters, onRouterS
     if (filters.model) params.append('model', filters.model);
     if (filters.status) params.append('status', filters.status);
 
-    fetch(`http://localhost:8000/api/dashboard?${params.toString()}`)
+    fetch(`${API_BASE_URL}/dashboard?${params.toString()}`)
       .then((res) => res.json())
       .then((dashboardData) => {
         setData(dashboardData);
@@ -87,7 +88,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ filters, onRouterS
     formData.append('file', file);
 
     try {
-      const res = await fetch(`http://localhost:8000/api/upload/${type}`, {
+      const res = await fetch(`${API_BASE_URL}/upload/${type}`, {
         method: 'POST',
         body: formData,
       });

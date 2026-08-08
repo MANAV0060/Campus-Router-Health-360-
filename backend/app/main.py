@@ -1,5 +1,6 @@
 # backend/app/main.py
 
+import os
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,10 +19,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS for React dev server
+# Enable CORS. Set CORS_ORIGINS to a comma-separated list of allowed
+# frontend origins in production (e.g. "https://your-app.vercel.app").
+# Defaults to "*" for local development / initial deploys.
+_cors_origins_env = os.environ.get("CORS_ORIGINS", "*")
+CORS_ORIGINS = ["*"] if _cors_origins_env == "*" else [o.strip() for o in _cors_origins_env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify frontend origin
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

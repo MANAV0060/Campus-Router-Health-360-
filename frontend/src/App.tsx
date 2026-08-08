@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, Router, Cpu, BarChart4, Network, Bell, HelpCircle, Activity, ScatterChart, Sliders } from 'lucide-react';
+import { API_BASE_URL } from './api/config';
 import { FilterBar } from './components/FilterBar';
 import { DashboardView } from './components/DashboardView';
 import { RouterTable } from './components/RouterTable';
@@ -27,7 +28,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ onRouterSelect }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/analytics')
+    fetch(`${API_BASE_URL}/analytics`)
       .then((res) => res.json())
       .then((data) => {
         setAnalytics(data);
@@ -276,7 +277,7 @@ function App() {
 
   // Periodically fetch general alerts (e.g. number of critical routers)
   useEffect(() => {
-    fetch('http://localhost:8000/api/dashboard')
+    fetch(`${API_BASE_URL}/dashboard`)
       .then((res) => res.json())
       .then((data) => {
         const critCount = data.summary.critical_count;
