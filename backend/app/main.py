@@ -7,6 +7,7 @@ from app.api.dashboard import router as dashboard_router
 from app.api.routers import router as routers_router
 from app.api.analytics import router as analytics_router
 from app.api.copilot import router as copilot_router
+from app.api.upload import router as upload_router
 from app.services.data_loader import reload_data
 from app.config import HOST, PORT
 
@@ -40,6 +41,7 @@ app.include_router(dashboard_router, prefix="/api", tags=["Dashboard"])
 app.include_router(routers_router, prefix="/api", tags=["Routers"])
 app.include_router(analytics_router, prefix="/api", tags=["Analytics"])
 app.include_router(copilot_router, prefix="/api", tags=["Copilot"])
+app.include_router(upload_router, prefix="/api", tags=["Upload"])
 
 @app.get("/")
 def read_root():
