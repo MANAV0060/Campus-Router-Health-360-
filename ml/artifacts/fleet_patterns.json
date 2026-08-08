@@ -1,0 +1,309 @@
+{
+  "fleet_summary": {
+    "total_routers": 60,
+    "high_risk_routers": 10,
+    "baseline_risk_rate_pct": 16.7
+  },
+  "patterns_by_dimension": {
+    "firmware_version": [
+      {
+        "category": "firmware_version",
+        "value": "v5.1",
+        "total_routers": 9,
+        "high_risk_routers": 5,
+        "risk_rate_pct": 55.6,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 3.33,
+        "is_systemic_pattern": true,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 103.1,
+        "avg_packet_loss_pct": 3.36
+      },
+      {
+        "category": "firmware_version",
+        "value": "v3.0",
+        "total_routers": 17,
+        "high_risk_routers": 3,
+        "risk_rate_pct": 17.6,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 1.06,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 56.6,
+        "avg_packet_loss_pct": 1.66
+      },
+      {
+        "category": "firmware_version",
+        "value": "v2.0",
+        "total_routers": 8,
+        "high_risk_routers": 1,
+        "risk_rate_pct": 12.5,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.75,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 30.6,
+        "avg_packet_loss_pct": 0.5
+      },
+      {
+        "category": "firmware_version",
+        "value": "v1.9",
+        "total_routers": 10,
+        "high_risk_routers": 1,
+        "risk_rate_pct": 10.0,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.6,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 55.9,
+        "avg_packet_loss_pct": 1.24
+      },
+      {
+        "category": "firmware_version",
+        "value": "v2.8",
+        "total_routers": 4,
+        "high_risk_routers": 0,
+        "risk_rate_pct": 0.0,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.0,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 34.0,
+        "avg_packet_loss_pct": 0.35
+      },
+      {
+        "category": "firmware_version",
+        "value": "v3.1",
+        "total_routers": 3,
+        "high_risk_routers": 0,
+        "risk_rate_pct": 0.0,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.0,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 25.0,
+        "avg_packet_loss_pct": 0.57
+      },
+      {
+        "category": "firmware_version",
+        "value": "v3.2",
+        "total_routers": 2,
+        "high_risk_routers": 0,
+        "risk_rate_pct": 0.0,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.0,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 36.5,
+        "avg_packet_loss_pct": 0.55
+      },
+      {
+        "category": "firmware_version",
+        "value": "v5.4",
+        "total_routers": 7,
+        "high_risk_routers": 0,
+        "risk_rate_pct": 0.0,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.0,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 22.1,
+        "avg_packet_loss_pct": 0.51
+      }
+    ],
+    "model": [
+      {
+        "category": "model",
+        "value": "AC-1200",
+        "total_routers": 16,
+        "high_risk_routers": 5,
+        "risk_rate_pct": 31.2,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 1.88,
+        "is_systemic_pattern": true,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 67.7,
+        "avg_packet_loss_pct": 2.11
+      },
+      {
+        "category": "model",
+        "value": "TL-841N",
+        "total_routers": 19,
+        "high_risk_routers": 3,
+        "risk_rate_pct": 15.8,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.95,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 54.5,
+        "avg_packet_loss_pct": 1.54
+      },
+      {
+        "category": "model",
+        "value": "NX-500",
+        "total_routers": 18,
+        "high_risk_routers": 2,
+        "risk_rate_pct": 11.1,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.67,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 44.7,
+        "avg_packet_loss_pct": 0.91
+      },
+      {
+        "category": "model",
+        "value": "DIR-615",
+        "total_routers": 7,
+        "high_risk_routers": 0,
+        "risk_rate_pct": 0.0,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.0,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 30.1,
+        "avg_packet_loss_pct": 0.44
+      }
+    ],
+    "building": [
+      {
+        "category": "building",
+        "value": "Staff-Qtrs",
+        "total_routers": 13,
+        "high_risk_routers": 4,
+        "risk_rate_pct": 30.8,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 1.85,
+        "is_systemic_pattern": true,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 60.9,
+        "avg_packet_loss_pct": 2.04
+      },
+      {
+        "category": "building",
+        "value": "Main-Block",
+        "total_routers": 5,
+        "high_risk_routers": 1,
+        "risk_rate_pct": 20.0,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 1.2,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 56.6,
+        "avg_packet_loss_pct": 2.16
+      },
+      {
+        "category": "building",
+        "value": "Hostel-A",
+        "total_routers": 13,
+        "high_risk_routers": 2,
+        "risk_rate_pct": 15.4,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.92,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 65.8,
+        "avg_packet_loss_pct": 1.53
+      },
+      {
+        "category": "building",
+        "value": "Lab-Complex",
+        "total_routers": 14,
+        "high_risk_routers": 2,
+        "risk_rate_pct": 14.3,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.86,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 39.3,
+        "avg_packet_loss_pct": 0.72
+      },
+      {
+        "category": "building",
+        "value": "Hostel-B",
+        "total_routers": 8,
+        "high_risk_routers": 1,
+        "risk_rate_pct": 12.5,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.75,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 58.8,
+        "avg_packet_loss_pct": 1.4
+      },
+      {
+        "category": "building",
+        "value": "Library",
+        "total_routers": 7,
+        "high_risk_routers": 0,
+        "risk_rate_pct": 0.0,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.0,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 26.1,
+        "avg_packet_loss_pct": 0.59
+      }
+    ],
+    "user_type": [
+      {
+        "category": "user_type",
+        "value": "student",
+        "total_routers": 33,
+        "high_risk_routers": 6,
+        "risk_rate_pct": 18.2,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 1.09,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 51.4,
+        "avg_packet_loss_pct": 1.42
+      },
+      {
+        "category": "user_type",
+        "value": "staff",
+        "total_routers": 27,
+        "high_risk_routers": 4,
+        "risk_rate_pct": 14.8,
+        "fleet_baseline_rate_pct": 16.7,
+        "risk_multiplier": 0.89,
+        "is_systemic_pattern": false,
+        "avg_health_score": 75.0,
+        "avg_latency_ms": 53.2,
+        "avg_packet_loss_pct": 1.32
+      }
+    ]
+  },
+  "systemic_alerts": [
+    {
+      "dimension": "firmware_version",
+      "group_name": "v5.1",
+      "total_in_group": 9,
+      "affected_routers": 5,
+      "risk_rate_pct": 55.6,
+      "multiplier": 3.33,
+      "statement": "firmware_version 'v5.1' exhibits a 55.6% risk rate (3.33x fleet baseline average of 16.7%).",
+      "causation_note": "Correlation detected across 9 units. Verify physical switch ports or RF environment before triggering fleet-wide rollback."
+    },
+    {
+      "dimension": "model",
+      "group_name": "AC-1200",
+      "total_in_group": 16,
+      "affected_routers": 5,
+      "risk_rate_pct": 31.2,
+      "multiplier": 1.88,
+      "statement": "model 'AC-1200' exhibits a 31.2% risk rate (1.88x fleet baseline average of 16.7%).",
+      "causation_note": "Correlation detected across 16 units. Verify physical switch ports or RF environment before triggering fleet-wide rollback."
+    },
+    {
+      "dimension": "building",
+      "group_name": "Staff-Qtrs",
+      "total_in_group": 13,
+      "affected_routers": 4,
+      "risk_rate_pct": 30.8,
+      "multiplier": 1.85,
+      "statement": "building 'Staff-Qtrs' exhibits a 30.8% risk rate (1.85x fleet baseline average of 16.7%).",
+      "causation_note": "Correlation detected across 13 units. Verify physical switch ports or RF environment before triggering fleet-wide rollback."
+    }
+  ]
+}
