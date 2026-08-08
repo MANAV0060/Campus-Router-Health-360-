@@ -1,20 +1,15 @@
 # Virtual Environment
 backend/.venv/
-backend/__pycache__/
-backend/app/__pycache__/
-backend/app/services/__pycache__/
-backend/app/api/__pycache__/
+**/__pycache__/
 
 # Node / Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/.vite/
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
+**/node_modules/
+**/dist/
+**/.vite/
+*.log
+.env
 
 # OS Files
 .DS_Store
 Thumbs.db
 desktop.ini
-*.log

@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg: #F2F2F2;
+    --card: #ffffff;
+    --border: #C9CFF2;
+    --text-p: #0f172a;
+    --text-s: #5E75F2;
+    --primary-main: #445EF2;
+    --primary-hover: #334bd9;
+    --primary-light: #5E75F2;
+    --primary-soft: #94A2F2;
+    --primary-ice: #C9CFF2;
+    --bg-light: #F2F2F2;
+  }
+
+  .dark {
+    --bg: #0b0e17;
+    --card: #121829;
+    --border: #1e284a;
+    --text-p: #ffffff;
+    --text-s: #94A2F2;
+    --primary-main: #445EF2;
+    --primary-hover: #5E75F2;
+    --primary-light: #5E75F2;
+    --primary-soft: #94A2F2;
+    --primary-ice: #C9CFF2;
+    --bg-light: #121829;
+  }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg);
+    color: var(--text-p);
+  }
+}
+
+/* Custom theme color utility classes based on requested palette */
+.bg-brand-primary { background-color: #445EF2; }
+.bg-brand-secondary { background-color: #5E75F2; }
+.bg-brand-soft { background-color: #94A2F2; }
+.bg-brand-ice { background-color: #C9CFF2; }
+.bg-brand-bg { background-color: #F2F2F2; }
+
+.text-brand-primary { color: #445EF2; }
+.text-brand-secondary { color: #5E75F2; }
+.text-brand-soft { color: #94A2F2; }
+
+.border-brand-primary { border-color: #445EF2; }
+.border-brand-secondary { border-color: #5E75F2; }
+.border-brand-soft { border-color: #94A2F2; }
+.border-brand-ice { border-color: #C9CFF2; }
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.pulse-emerald {
+  box-shadow: 0 0 0 rgba(16, 185, 129, 0.4);
+  animation: pulse-e 2s infinite;
+}
+
+.pulse-rose {
+  box-shadow: 0 0 0 rgba(244, 63, 94, 0.4);
+  animation: pulse-r 1s infinite;
+}
+
+@keyframes pulse-e {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes pulse-r {
+  0% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(244, 63, 94, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
+}
+
+.inventory-table tr {
+  border-bottom: 1px solid var(--border);
+  transition: all 0.15s ease-out;
+}
+
+.inventory-table tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(2px);
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--text-p);
+  transition: width 0.3s ease;
+}
+
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.08);
+    box-shadow: 0 0 8px 3px rgba(16, 185, 129, 0.3);
+  }
+}
+
+@keyframes rapidPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.15);
+    box-shadow: 0 0 12px 5px rgba(244, 63, 94, 0.5);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-soft-pulse {
+  animation: softPulse 2.5s infinite ease-in-out;
+}
+
+.animate-rapid-pulse {
+  animation: rapidPulse 0.9s infinite ease-in-out;
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, rgba(228, 231, 236, 0.2) 25%, rgba(228, 231, 236, 0.5) 50%, rgba(228, 231, 236, 0.2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.dark .shimmer-bg {
+  background: linear-gradient(90deg, rgba(29, 41, 57, 0.3) 25%, rgba(29, 41, 57, 0.7) 50%, rgba(29, 41, 57, 0.3) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Custom scrollbar for dark/light grayscale design system */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.5);
+}
+
+
