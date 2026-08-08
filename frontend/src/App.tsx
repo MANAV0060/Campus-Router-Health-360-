@@ -206,11 +206,6 @@ function App() {
     }
   };
 
-  // Fleet Analytics Panel View Component
-  const renderAnalyticsView = () => {
-    return <AnalyticsView onRouterSelect={handleRouterSelect} />;
-  };
-
   return (
     <div className="min-h-screen bg-bg-dark text-slate-100 flex font-sans">
       {/* 1. Sidebar Panel */}
@@ -346,7 +341,7 @@ function App() {
 
           {currentPage === 'copilot' && <CopilotView />}
 
-          {currentPage === 'analytics' && renderAnalyticsView()}
+          {currentPage === 'analytics' && <AnalyticsView onRouterSelect={handleRouterSelect} />}
         </main>
       </div>
     </div>
