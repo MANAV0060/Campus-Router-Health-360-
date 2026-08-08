@@ -90,6 +90,18 @@ npm run dev
 
 ---
 
+## 🧪 Verification & Testing
+
+NetSentinel includes an automated backend validation suite to verify the telemetry parsing, health scoring, peer baselines, and fallback prompt formatting:
+
+```bash
+cd backend
+python verify_backend.py
+```
+*This script executes core diagnostics assertions and verifies the fallback structures.*
+
+---
+
 ## 🧪 Demo Checklist
 
 1. **Dashboard KPI check**: Verify fleet aggregates (60 total, 52 healthy, 8 critical).
