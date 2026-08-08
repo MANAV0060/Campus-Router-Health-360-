@@ -325,71 +325,108 @@ function App() {
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-4 flex flex-col gap-1.5">
+          <nav className="p-4 flex flex-col gap-2">
+            <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-500 tracking-wider">Fleet Management</div>
+
             {/* Dashboard Link */}
             <button
+              type="button"
               onClick={() => navigateToPage('dashboard')}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${currentPage === 'dashboard' ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                currentPage === 'dashboard'
+                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
+                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+              }`}
             >
-              <LayoutDashboard size={18} />
+              <LayoutDashboard size={16} className={currentPage === 'dashboard' ? 'text-emerald-400' : 'text-slate-400'} />
               <span>Operations Dashboard</span>
             </button>
 
             {/* Router Explorer Link */}
             <button
+              type="button"
               onClick={() => navigateToPage('routers')}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${currentPage === 'routers' || currentPage === 'router-detail' ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                currentPage === 'routers' || currentPage === 'router-detail'
+                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
+                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+              }`}
             >
-              <Router size={18} />
+              <Router size={16} className={currentPage === 'routers' || currentPage === 'router-detail' ? 'text-emerald-400' : 'text-slate-400'} />
               <span>Router Explorer</span>
             </button>
 
             {/* AI Copilot Link */}
             <button
+              type="button"
               onClick={() => navigateToPage('copilot')}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${currentPage === 'copilot' ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                currentPage === 'copilot'
+                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
+                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+              }`}
             >
-              <Cpu size={18} />
+              <Cpu size={16} className={currentPage === 'copilot' ? 'text-emerald-400' : 'text-slate-400'} />
               <span>AI Copilot Console</span>
             </button>
 
             {/* Analytics Link */}
             <button
+              type="button"
               onClick={() => navigateToPage('analytics')}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${currentPage === 'analytics' ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                currentPage === 'analytics'
+                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
+                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+              }`}
             >
-              <BarChart4 size={18} />
+              <BarChart4 size={16} className={currentPage === 'analytics' ? 'text-emerald-400' : 'text-slate-400'} />
               <span>Fleet Analytics</span>
             </button>
 
             {/* Divider */}
-            <div className="mx-4 my-2 border-t border-slate-800/40"></div>
-            <div className="px-4 py-1 text-[9px] uppercase font-bold text-slate-500 tracking-wider">Predictive ML Suite</div>
+            <div className="my-2 border-t border-slate-800/60"></div>
+            <div className="px-3 py-1 text-[10px] uppercase font-bold text-cyan-400 tracking-wider">Predictive ML Suite</div>
 
             {/* Predictive Operations Link */}
             <button
+              type="button"
               onClick={() => navigateToPage('predictive-ops')}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${currentPage === 'predictive-ops' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                currentPage === 'predictive-ops'
+                  ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-md shadow-cyan-500/5'
+                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+              }`}
             >
-              <Activity size={18} />
+              <Activity size={16} className={currentPage === 'predictive-ops' ? 'text-cyan-400' : 'text-slate-400'} />
               <span>Predictive Operations</span>
             </button>
 
             {/* Systemic Patterns Link */}
             <button
+              type="button"
               onClick={() => navigateToPage('predictive-patterns')}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${currentPage === 'predictive-patterns' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                currentPage === 'predictive-patterns'
+                  ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-md shadow-cyan-500/5'
+                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+              }`}
             >
-              <ScatterChart size={18} />
+              <ScatterChart size={16} className={currentPage === 'predictive-patterns' ? 'text-cyan-400' : 'text-slate-400'} />
               <span>Systemic Patterns</span>
             </button>
 
             {/* XGBoost Performance Link */}
             <button
+              type="button"
               onClick={() => navigateToPage('predictive-model')}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${currentPage === 'predictive-model' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/50'}`}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+                currentPage === 'predictive-model'
+                  ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-md shadow-cyan-500/5'
+                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+              }`}
             >
-              <Sliders size={18} />
+              <Sliders size={16} className={currentPage === 'predictive-model' ? 'text-cyan-400' : 'text-slate-400'} />
               <span>XGBoost Diagnostics</span>
             </button>
           </nav>
