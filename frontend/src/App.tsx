@@ -262,7 +262,7 @@ const PredictiveOpsView: React.FC<PredictiveOpsViewProps> = ({ onRouterSelect })
 };
 
 function App() {
-  const [currentPage, setCurrentPage] = useState<Page>('dashboard');
+  const [currentPage, setCurrentPage] = useState<Page>('predictive-ops');
   const [selectedRouterId, setSelectedRouterId] = useState<string>('');
   const [selectedPredictiveRouter, setSelectedPredictiveRouter] = useState<string | null>(null);
   const [filters, setFilters] = useState({
