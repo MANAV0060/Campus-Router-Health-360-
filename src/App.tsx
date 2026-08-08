@@ -14,9 +14,21 @@ import { KPISkeleton, TableSkeleton } from './components/SkeletonLoader';
 import {
   DashboardResponse,
   RouterItem,
-  FilterState
+  FilterState,
+  FleetKpis,
+  PredictiveRouterSummary
 } from './types';
-import { fetchDashboard, fetchRouters } from './services/api';
+import { fetchDashboard, fetchRouters, fetchFleetKpis, fetchRoutersRanking } from './services/api';
+
+// Predictive ML Views
+import { DemoModeBanner } from './components/DemoModeBanner';
+import { MetricCards } from './components/MetricCards';
+import { HealthDistributionChart } from './components/HealthDistributionChart';
+import { PredictedDegradationTable } from './components/PredictedDegradationTable';
+import { FleetPatternsSection } from './components/FleetPatternsSection';
+import { ModelTrainingPage } from './components/ModelTrainingPage';
+import { RouterDetailModal } from './components/RouterDetailModal';
+import { Layers, Cpu, Activity } from 'lucide-react';
 
 export default function App() {
   const [darkMode, setDarkMode] = useState<boolean>(false);
@@ -34,6 +46,7 @@ export default function App() {
   const [routers, setRouters] = useState<RouterItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedRouter, setSelectedRouter] = useState<RouterItem | null>(null);
+  const [predictiveRouterId, setPredictiveRouterId] = useState<string | null>(null);
 
   // Sync dark class to root document element
   useEffect(() => {
@@ -206,6 +219,29 @@ export default function App() {
               )}
 
               {activeTab === 'copilot' && <AICopilotConsole />}
+
+              {activeTab === 'predictive_ops' && (
+                <PredictiveOpsView onSelectRouter={(id) => setPredictiveRouterId(id)} />
+              )}
+
+              {activeTab === 'predictive_patterns' && (
+                <div className="space-y-6">
+                  <div className="bg-white dark:bg-[#121829] border border-[#C9CFF2]/60 dark:border-[#1e284a] rounded-2xl p-6 shadow-2xs">
+                    <h2 className="text-base font-bold text-gray-900 dark:text-white mb-1.5 flex items-center gap-2">
+                      <Layers className="w-5 h-5 text-cyan-500" />
+                      Systemic Cohort Risk Patterns
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-6">
+                      Statistically significant risk anomalies grouped by hardware configurations.
+                    </p>
+                    <FleetPatternsSection />
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'predictive_model' && (
+                <ModelTrainingPage />
+              )}
             </motion.div>
           </AnimatePresence>
         </motion.main>
@@ -218,6 +254,81 @@ export default function App() {
           onClose={() => setSelectedRouter(null)}
         />
       )}
+
+      {/* 360° Diagnostic Predictive Modal */}
+      {predictiveRouterId && (
+        <RouterDetailModal
+          routerId={predictiveRouterId}
+          onClose={() => setPredictiveRouterId(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// Inline Predictive Dashboard view wrapper
+interface PredictiveOpsViewProps {
+  onSelectRouter: (id: string) => void;
+}
+
+function PredictiveOpsView({ onSelectRouter }: PredictiveOpsViewProps) {
+  const [kpis, setKpis] = useState<FleetKpis | null>(null);
+  const [routers, setRouters] = useState<PredictiveRouterSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Table filters state
+  const [sortBy, setSortBy] = useState('priority');
+  const [filterStatus, setFilterStatus] = useState('ALL');
+  const [filterBuilding, setFilterBuilding] = useState('ALL');
+  const [filterRisk, setFilterRisk] = useState('ALL');
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      fetchFleetKpis(),
+      fetchRoutersRanking({
+        sortBy,
+        filterStatus,
+        filterBuilding,
+        filterRisk,
+        search
+      })
+    ]).then(([kpiData, rankingData]) => {
+      setKpis(kpiData);
+      setRouters(rankingData);
+    })
+    .catch((err) => console.error('Predictive load error:', err))
+    .finally(() => setLoading(false));
+  }, [sortBy, filterStatus, filterBuilding, filterRisk, search]);
+
+  if (loading && !kpis) {
+    return <TableSkeleton />;
+  }
+
+  return (
+    <div className="space-y-6">
+      <DemoModeBanner />
+      {kpis && <MetricCards kpis={kpis} />}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <PredictedDegradationTable
+            routers={routers}
+            onSelectRouter={onSelectRouter}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+            filterBuilding={filterBuilding}
+            setFilterBuilding={setFilterBuilding}
+            filterRisk={filterRisk}
+            setFilterRisk={setFilterRisk}
+          />
+        </div>
+        <div>
+          {kpis && <HealthDistributionChart kpis={kpis} />}
+        </div>
+      </div>
     </div>
   );
 }

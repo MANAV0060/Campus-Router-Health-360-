@@ -16,7 +16,7 @@ import {
   Layers
 } from 'lucide-react';
 
-export type TabType = 'dashboard' | 'explorer' | 'at_risk' | 'analytics' | 'copilot';
+export type TabType = 'dashboard' | 'explorer' | 'at_risk' | 'analytics' | 'copilot' | 'predictive_ops' | 'predictive_patterns' | 'predictive_model';
 
 interface SidebarProps {
   activeTab: TabType;
@@ -149,6 +149,47 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       {item.badge}
                     </span>
                   )}
+                </motion.button>
+              );
+            })}
+          </nav>
+
+          {/* Divider */}
+          <div className="my-4 border-t border-gray-200 dark:border-gray-800/80"></div>
+          
+          <div className="flex items-center justify-between mb-2 px-2">
+            <span className="text-[10px] font-extrabold tracking-widest text-gray-400 dark:text-gray-500 uppercase">
+              PREDICTIVE ML SUITE
+            </span>
+          </div>
+
+          <nav className="space-y-1.5">
+            {[
+              { id: 'predictive_ops' as TabType, label: 'Predictive Operations', icon: Activity },
+              { id: 'predictive_patterns' as TabType, label: 'Systemic Patterns', icon: Layers },
+              { id: 'predictive_model' as TabType, label: 'XGBoost Diagnostics', icon: Cpu }
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <motion.button
+                  key={item.id}
+                  whileHover={{ x: 3 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    if (onCloseMobile) onCloseMobile();
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-bold border border-cyan-500/30 shadow-2xs'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-[#C9CFF2]/30 dark:hover:bg-gray-800/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-400'}`} />
+                    <span className="truncate">{item.label}</span>
+                  </div>
                 </motion.button>
               );
             })}
