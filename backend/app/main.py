@@ -3,12 +3,12 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.predictive import router as predictive_router
 from app.api.dashboard import router as dashboard_router
 from app.api.routers import router as routers_router
 from app.api.analytics import router as analytics_router
 from app.api.copilot import router as copilot_router
 from app.api.upload import router as upload_router
-from app.api.predictive import router as predictive_router
 from app.services.data_loader import reload_data
 from app.config import HOST, PORT
 
@@ -21,7 +21,7 @@ app = FastAPI(
 # Enable CORS for React dev server
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify frontend origin
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,13 +37,13 @@ def startup_event():
     except Exception as e:
         print(f"[NetSentinel] Error loading datasets on startup: {str(e)}")
 
-# Include API routes
+# Include API routes (Predictive routes registered first to avoid path param collision)
+app.include_router(predictive_router, prefix="/api", tags=["Predictive ML"])
 app.include_router(dashboard_router, prefix="/api", tags=["Dashboard"])
 app.include_router(routers_router, prefix="/api", tags=["Routers"])
 app.include_router(analytics_router, prefix="/api", tags=["Analytics"])
 app.include_router(copilot_router, prefix="/api", tags=["Copilot"])
 app.include_router(upload_router, prefix="/api", tags=["Upload"])
-app.include_router(predictive_router, prefix="/api", tags=["Predictive ML"])
 
 @app.get("/")
 def read_root():

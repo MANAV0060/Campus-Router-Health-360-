@@ -3,17 +3,26 @@
 import os
 import re
 from typing import Dict, Any, List
-import google.generativeai as genai
+
+try:
+    import google.generativeai as genai
+    HAS_GENAI = True
+except ImportError:
+    HAS_GENAI = False
+    genai = None
+
 from app.services.evidence_engine import get_router_evidence, get_baselines_and_cohorts
 from app.services.impact_engine import get_prioritized_intervention_list
 from app.services.health_score import get_all_router_healths
 
 # Configure Gemini if API key is available
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-    # Use standard gemini model
-    _model = genai.GenerativeModel("gemini-1.5-flash")
+if HAS_GENAI and GEMINI_API_KEY:
+    try:
+        genai.configure(api_key=GEMINI_API_KEY)
+        _model = genai.GenerativeModel("gemini-1.5-flash")
+    except Exception:
+        _model = None
 else:
     _model = None
 
@@ -43,248 +52,107 @@ Instructions:
    ### Recommended action
    Give exactly ONE recommended action.
 4. Do not invent any numbers, names, or router IDs.
-5. If the context does not contain the answer, say 'I cannot answer that based on the available data.'
 """
     response = _model.generate_content(full_prompt)
     return response.text
 
-def run_deterministic_fallback(prompt: str) -> str:
-    """Deterministic fallback when LLM is unavailable."""
-    prompt_lower = prompt.lower()
+def handle_copilot_chat(query: str, selected_router_id: str = None) -> Dict[str, Any]:
+    """
+    Main entry point for Copilot queries.
+    Handles router-specific queries, comparison queries, and general operations queries.
+    Provides structured rule-based responses if Gemini API is not configured.
+    """
+    query_lower = query.lower().strip()
     
-    # 1. Check for specific router ID, e.g., R-1042, R-1002
-    router_match = re.search(r"r-\d{4}", prompt_lower)
-    if router_match:
-        router_id = router_match.group(0).upper()
-        try:
-            evidence = get_router_evidence(router_id)
-            status = evidence["health"]["status"]
-            score = evidence["health"]["score"]
+    # 1. Check for specific router reference in query or parameter
+    target_router_id = selected_router_id
+    if not target_router_id:
+        match = re.search(r'\b(R-\d{4})\b', query, re.IGNORECASE)
+        if match:
+            target_router_id = match.group(1).upper()
             
-            # Format evidence list
-            ev_points = []
-            primary_factor_desc = ""
-            for item in evidence["evidence"]:
-                factor = item["factor"].replace("_", " ").title()
-                curr = item["current"]
-                base = item["baseline"]
-                change = item["change_percent"]
-                
-                # Custom verbal representations
-                if item["factor"] == "latency":
-                    ev_points.append(f"• Latency is {curr} ms, compared with a {base} ms baseline.")
-                elif item["factor"] == "packet_loss":
-                    ev_points.append(f"• Packet loss is {curr}%, compared with a {base}% baseline.")
-                elif item["factor"] == "disconnects":
-                    ev_points.append(f"• Disconnects are {int(curr)} total, compared with a {int(base)} baseline.")
-                elif item["factor"] == "signal":
-                    ev_points.append(f"• Signal strength is {curr} dBm, compared with a {base} dBm baseline.")
-                elif item["factor"] == "speed":
-                    ev_points.append(f"• Speed decreased to {curr} Mbps, compared with a {base} Mbps baseline.")
-                elif item["factor"] == "device_load":
-                    ev_points.append(f"• Connected devices average {curr}, compared with a {base} baseline.")
-                elif item["factor"] == "firmware_cohort":
-                    ev_points.append(f"• Firmware cohort exhibits a {curr}% critical-router rate, compared with a campus baseline of {base}%.")
-            
-            if evidence["evidence"]:
-                top_factor = evidence["evidence"][0]
-                factor_name = top_factor["factor"].replace("_", " ").title()
-                primary_factor_desc = f"{factor_name} is the strongest observed degradation signal."
-            else:
-                primary_factor_desc = "No major metric degradation is observed."
-                
-            rec_action = evidence["recommendation"]["action"]
-            
-            # Format into the strict diagnosis structure
-            return f"""### Diagnosis
-{router_id} is experiencing network degradation, currently classified as {status.upper()} (Health Score: {score}/100).
-
-### Evidence
-{chr(10).join(ev_points)}
-
-### Likely contributing factor
-{primary_factor_desc}
-
-### Recommended action
-{rec_action}"""
-            
-        except Exception as e:
-            return f"I encountered an error retrieving data for router {router_id}: {str(e)}"
-            
-    # 2. Check for building cohort questions, e.g., "Hostel B", "Library"
-    buildings = ["hostel-a", "hostel-b", "library", "lab-complex", "main-block", "staff-qtrs"]
-    matched_building = None
-    for b in buildings:
-        # standard matches with or without hyphens
-        if b in prompt_lower or b.replace("-", " ") in prompt_lower:
-            matched_building = b
-            break
-            
-    if matched_building:
-        health_data = get_all_router_healths()
-        b_name = matched_building.replace("-", " ").title()
-        # Find routers in building
-        building_routers = [h for h in health_data.values() if h.get("building", "").lower() == matched_building]
-        if not building_routers:
-            # try fuzzy matching
-            building_routers = [h for h in health_data.values() if matched_building.split("-")[0] in h.get("building", "").lower()]
-            if building_routers:
-                b_name = building_routers[0].get("building")
-                
-        if building_routers:
-            total_r = len(building_routers)
-            critical_r = [r for r in building_routers if r["status"] == "Critical"]
-            watch_r = [r for r in building_routers if r["status"] == "Watch"]
-            at_risk_r = [r for r in building_routers if r["status"] == "At Risk"]
-            
-            summary = f"Building **{b_name}** has {total_r} active routers.\n"
-            summary += f"- Critical: {len(critical_r)}\n"
-            summary += f"- Healthy: {total_r - len(critical_r) - len(watch_r) - len(at_risk_r)}\n\n"
-            
-            if critical_r:
-                summary += "The following critical routers require immediate attention:\n"
-                for cr in critical_r:
-                    # Let's see issues
-                    ev_pkg = get_router_evidence(cr["router_id"])
-                    top_issues = [f"{e['factor'].replace('_', ' ')} ({e['strength']})" for e in ev_pkg["evidence"][:2]]
-                    summary += f"- **{cr['router_id']}** (Health: {cr['health_score']}/100) — Primary issues: {', '.join(top_issues)}. Action: {ev_pkg['recommendation']['action']}\n"
-            else:
-                summary += "All routers in this building are currently performing within healthy operational limits."
-            return summary
-
-    # 3. Check for firmware performance questions
-    if "firmware" in prompt_lower:
-        health_data = get_all_router_healths()
-        firmwares = {}
-        for rid, h in health_data.items():
-            fw = h.get("firmware", "Unknown")
-            if fw not in firmwares:
-                firmwares[fw] = {"total": 0, "critical": 0}
-            firmwares[fw]["total"] += 1
-            if h["status"] == "Critical":
-                firmwares[fw]["critical"] += 1
-                
-        # Sort by number of critical, then by critical rate
-        sorted_fw = sorted(firmwares.items(), key=lambda x: (x[1]["critical"], x[1]["critical"]/x[1]["total"] if x[1]["total"] > 0 else 0), reverse=True)
-        
-        response = "### Firmware Performance Audit\n\n"
-        response += "Here is the critical-router rate grouped by firmware version across the campus network:\n\n"
-        for fw, stats in sorted_fw:
-            rate = (stats["critical"] / stats["total"]) * 100
-            response += f"- **Firmware {fw}**: {stats['critical']} Critical / {stats['total']} Total ({rate:.1f}% Critical-router rate)\n"
-            
-        top_fw = sorted_fw[0][0]
-        top_rate = (sorted_fw[0][1]["critical"] / sorted_fw[0][1]["total"]) * 100
-        if sorted_fw[0][1]["critical"] > 0:
-            response += f"\n**Conclusion**: Firmware **{top_fw}** is associated with the highest proportion of critical routers, with a {top_rate:.1f}% critical-router rate. Fleet update or rollback should be investigated."
-        else:
-            response += "\n**Conclusion**: All firmware versions are currently operating with 100% healthy profiles."
-        return response
-
-    # 4. Check for IT Priority list questions
-    if "investigate first" in prompt_lower or "priority" in prompt_lower or "worst routers" in prompt_lower:
-        priorities = get_prioritized_intervention_list()
-        if not priorities:
-            return "All routers are healthy. There are no critical interventions required at this time."
-            
-        response = "### IT Intervention Priority Queue (Priority Score Rank)\n\n"
-        response += "Here are the top routers requiring troubleshooting, prioritized by severity, user impact, and evidence strength:\n\n"
-        
-        for idx, pr in enumerate(priorities[:5]):
-            response += f"{idx+1}. **{pr['router_id']}** ({pr['building']}, Room {pr['room']})\n"
-            response += f"   - **Priority Tier**: {pr['tier']} (Score: {pr['priority_score']})\n"
-            response += f"   - **Health**: {pr['health_score']}/100 ({pr['status']})\n"
-            response += f"   - **Impacted Users**: {pr['affected_users']} average connected devices\n"
-            
-            ev_pkg = get_router_evidence(pr["router_id"])
-            rec = ev_pkg["recommendation"]["action"]
-            reason = ev_pkg["recommendation"]["reason"]
-            response += f"   - **Recommended Action**: {rec}\n"
-            response += f"   - **Reason**: {reason}\n\n"
-            
-        return response
-
-    # Default general response
-    return """I am NetSentinel Copilot, your campus network operations assistant. I can help you analyze the router datasets.
-
-You can ask me questions such as:
-1. "Why is R-1042 unhealthy?"
-2. "What is wrong with the routers in Hostel B?"
-3. "Which firmware version has the most unhealthy routers?"
-4. "What should IT investigate first?"
-"""
-
-def handle_copilot_chat(query: str) -> Dict[str, Any]:
-    """
-    Main entry point for API copilot queries.
-    Assembles context if necessary and calls Gemini (falling back to deterministic generator if not configured).
-    """
-    try:
-        # Try LLM if configured
-        if GEMINI_API_KEY and _model:
-            # Build context dynamically
-            baselines_info = get_baselines_and_cohorts()
-            health_data = baselines_info["health_data"]
-            global_b = baselines_info["global"]
-            healthy_b = baselines_info["healthy"]
-            
-            # Simple keyword matching to limit context size
-            context_pieces = []
-            
-            # 1. Router ID context
-            router_match = re.search(r"r-\d{4}", query.lower())
-            if router_match:
-                router_id = router_match.group(0).upper()
-                if router_id in health_data:
-                    evidence = get_router_evidence(router_id)
-                    context_pieces.append(f"Router {router_id} Details: {str(evidence)}")
-            
-            # 2. Building context
-            buildings = ["hostel-a", "hostel-b", "library", "lab-complex", "main-block", "staff-qtrs"]
-            matched_b = next((b for b in buildings if b in query.lower() or b.replace("-", " ") in query.lower()), None)
-            if matched_b:
-                b_routers = [h for h in health_data.values() if h.get("building", "").lower() == matched_b]
-                context_pieces.append(f"Routers in building {matched_b}: {str(b_routers)}")
-                
-            # 3. General firmware cohort rates
-            if "firmware" in query.lower():
-                fw_stats = {}
-                for rid, h in health_data.items():
-                    fw = h.get("firmware", "Unknown")
-                    if fw not in fw_stats:
-                        fw_stats[fw] = {"total": 0, "critical": 0}
-                    fw_stats[fw]["total"] += 1
-                    if h["status"] == "Critical":
-                        fw_stats[fw]["critical"] += 1
-                context_pieces.append(f"Firmware Performance Stats (Total/Critical): {str(fw_stats)}")
-                
-            # 4. IT Priorities
-            if "investigate" in query.lower() or "priority" in query.lower() or "worst" in query.lower():
-                priorities = get_prioritized_intervention_list()
-                context_pieces.append(f"Top degraded routers priority queue: {str(priorities[:8])}")
-                
-            # Fallback general context if nothing matched
-            if not context_pieces:
-                # Add basic statistics
-                total_routers = len(health_data)
-                critical_routers = [rid for rid, h in health_data.items() if h["status"] == "Critical"]
-                context_pieces.append(f"General Campus Summary: {total_routers} total routers, {len(critical_routers)} critical status routers. Critical router IDs: {critical_routers}")
-            
-            context_str = "\n\n".join(context_pieces)
-            ai_response = run_gemini_query(query, context_str)
+    # If a router ID is identified
+    if target_router_id:
+        evidence = get_router_evidence(target_router_id)
+        if not evidence:
             return {
-                "query": query,
-                "response": ai_response,
-                "source": "Gemini-1.5-Flash"
+                "answer": f"Router {target_router_id} was not found in the active network inventory.",
+                "evidence": {},
+                "suggested_followups": ["Show all critical routers", "Which firmware has highest risk?"]
             }
-    except Exception as e:
-        # Log error internally and use deterministic generator
-        pass
+            
+        # If Gemini is available, use LLM
+        if _model:
+            try:
+                context_str = f"Router: {target_router_id}\n"
+                context_str += f"Health: {evidence.get('health_score')}/100 ({evidence.get('health_status')})\n"
+                context_str += f"Building: {evidence.get('building')}, Room: {evidence.get('room')}\n"
+                context_str += f"Firmware: {evidence.get('firmware_version')}, Model: {evidence.get('model')}\n"
+                context_str += f"Metrics: {evidence.get('metrics')}\n"
+                context_str += f"Evidence Bullet Points:\n" + "\n".join([f"- {e}" for e in evidence.get('evidence_bullets', [])])
+                context_str += f"\nRecommended Action: {evidence.get('recommended_action')}\n"
+                
+                answer = run_gemini_query(query, context_str)
+                return {
+                    "answer": answer,
+                    "evidence": evidence,
+                    "suggested_followups": [
+                        f"What is the historical trend for {target_router_id}?",
+                        f"How does {target_router_id} compare to other routers in {evidence.get('building')}?",
+                        "What is the priority score for this router?"
+                    ]
+                }
+            except Exception as e:
+                pass  # Fallback to structured deterministic output
+                
+        # Structured deterministic fallback
+        ans_lines = [
+            f"### Diagnosis",
+            f"{target_router_id} is currently in {evidence.get('health_status')} state with a health score of {evidence.get('health_score')}/100.",
+            f"",
+            f"### Evidence",
+        ]
+        for bullet in evidence.get('evidence_bullets', []):
+            ans_lines.append(f"- {bullet}")
+            
+        ans_lines.extend([
+            f"",
+            f"### Likely contributing factor",
+            f"{evidence.get('root_cause_diagnosis', 'Network degradation signature')}",
+            f"",
+            f"### Recommended action",
+            f"{evidence.get('recommended_action')}"
+        ])
         
-    # Run deterministic fallback
-    fallback_response = run_deterministic_fallback(query)
+        return {
+            "answer": "\n".join(ans_lines),
+            "evidence": evidence,
+            "suggested_followups": [
+                f"Why is its risk higher than other routers in {evidence.get('building')}?",
+                f"Is {evidence.get('firmware_version')} showing a fleet-wide systemic pattern?",
+                f"What exact evidence supports the {evidence.get('recommended_action')} recommendation?"
+            ]
+        }
+        
+    # General queries (e.g. "which routers need attention?", "fleet summary")
+    interventions = get_prioritized_intervention_list()
+    top_critical = [item for item in interventions if item.get('priority_level') == 'CRITICAL'][:5]
+    
+    ans_lines = [
+        "### Fleet Diagnostic Summary",
+        f"There are currently {len(top_critical)} routers requiring immediate operational attention.",
+        "",
+        "### Top Priority Interventions"
+    ]
+    for item in top_critical:
+        ans_lines.append(f"- **{item['router_id']}** (Priority: {item['priority_score']}, Health: {item['current_health']}): {item['recommended_action']}")
+        
     return {
-        "query": query,
-        "response": fallback_response,
-        "source": "Deterministic-Fallback"
+        "answer": "\n".join(ans_lines),
+        "evidence": {"critical_count": len(top_critical)},
+        "suggested_followups": [
+            "Tell me more about R-1042",
+            "Which firmware has highest failure rate?",
+            "Show building-level failure distribution"
+        ]
     }

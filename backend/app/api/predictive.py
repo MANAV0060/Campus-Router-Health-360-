@@ -1,7 +1,7 @@
 # backend/app/api/predictive.py
 
 """
-NetSentinel API Router (Predictive Component)
+NetSentinel API Router (Predictive ML Component)
 Exposes predictive network operations REST APIs based on supervised XGBoost & SHAP explanations.
 """
 
@@ -21,12 +21,16 @@ from app.services.predictive_copilot_service import copilot_service
 
 router = APIRouter()
 
-@router.get("/predictive/kpis", response_model=FleetKpis)
+@router.get("/fleet/kpis", response_model=FleetKpis)
 def get_fleet_kpis():
     """Returns high-level network operations summary metrics from the ML model."""
     return router_service.get_fleet_kpis()
 
-@router.get("/predictive/ranking")
+@router.get("/predictive/kpis", response_model=FleetKpis)
+def get_predictive_kpis():
+    return router_service.get_fleet_kpis()
+
+@router.get("/routers/ranking")
 def get_routers_ranking(
     sort_by: str = Query("priority", description="Sorting field: priority, future_risk, current_health_asc, current_health_desc, devices"),
     filter_status: Optional[str] = Query("ALL", description="Filter by health status: ALL, HEALTHY, WATCH, AT_RISK, CRITICAL"),
@@ -43,6 +47,23 @@ def get_routers_ranking(
         search=search
     )
 
+@router.get("/predictive/ranking")
+def get_predictive_ranking(
+    sort_by: str = Query("priority"),
+    filter_status: Optional[str] = Query("ALL"),
+    filter_building: Optional[str] = Query("ALL"),
+    filter_risk: Optional[str] = Query("ALL"),
+    search: Optional[str] = Query(None)
+):
+    return router_service.get_routers_ranking(
+        sort_by=sort_by,
+        filter_status=filter_status,
+        filter_building=filter_building,
+        filter_risk=filter_risk,
+        search=search
+    )
+
+@router.get("/predictions/high-risk")
 @router.get("/predictive/high-risk")
 def get_high_risk_predictions():
     """Returns routers with future degradation risk >= 60% prioritized for early IT intervention."""
@@ -53,6 +74,7 @@ def get_high_risk_predictions():
         "high_risk_routers": high_risk
     }
 
+@router.get("/routers/{router_id}")
 @router.get("/predictive/routers/{router_id}")
 def get_router_detail(router_id: str):
     """Returns comprehensive 360-degree diagnostic package for a single router."""
@@ -61,6 +83,7 @@ def get_router_detail(router_id: str):
         raise HTTPException(status_code=404, detail=f"Router '{router_id}' not found in active inventory.")
     return detail
 
+@router.get("/routers/{router_id}/prediction")
 @router.get("/predictive/routers/{router_id}/prediction")
 def get_router_prediction(router_id: str):
     """Returns pure ML prediction payload matching the exact hackathon API specification."""
@@ -78,16 +101,19 @@ def get_router_prediction(router_id: str):
         "recommended_action": detail["recommended_action"]
     }
 
+@router.get("/patterns")
 @router.get("/predictive/patterns")
 def get_fleet_patterns():
     """Returns systemic fleet-level patterns across firmware, building, model, and user type."""
     return router_service.fleet_patterns
 
+@router.get("/model/metrics")
 @router.get("/predictive/model/metrics")
 def get_model_metrics():
     """Returns real test set evaluation metrics, confusion matrix, ROC points, and global SHAP rankings."""
     return router_service.eval_metrics
 
+@router.post("/copilot", response_model=CopilotResponse)
 @router.post("/predictive/copilot", response_model=CopilotResponse)
 def query_copilot(payload: CopilotQuery):
     """AI Copilot query endpoint grounded in structured backend telemetry and ML evidence."""

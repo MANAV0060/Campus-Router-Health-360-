@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
-import { Activity, ShieldAlert, Heart, ClipboardList, AlertTriangle, Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { Activity, ShieldAlert, Heart, ClipboardList, Upload } from 'lucide-react';
 
 interface RouterSummary {
   rank: number;
@@ -41,327 +40,155 @@ interface DashboardViewProps {
   onRouterSelect: (routerId: string) => void;
 }
 
-const STATUS_COLORS = {
-  Healthy: '#10b981',
-  Watch: '#f59e0b',
-  'At Risk': '#f97316',
-  Critical: '#ef4444',
-};
-
 export const DashboardView: React.FC<DashboardViewProps> = ({ filters, onRouterSelect }) => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<{ success: boolean; message: string } | null>(null);
-  const [reloadTrigger, setReloadTrigger] = useState(0);
 
   useEffect(() => {
     setLoading(true);
-    // Construct query parameters
-    const params = new URLSearchParams();
-    if (filters.building) params.append('building', filters.building);
-    if (filters.firmware) params.append('firmware', filters.firmware);
-    if (filters.model) params.append('model', filters.model);
-    if (filters.status) params.append('status', filters.status);
+    const query = new URLSearchParams();
+    if (filters.building) query.append('building', filters.building);
+    if (filters.firmware) query.append('firmware', filters.firmware);
+    if (filters.model) query.append('model', filters.model);
+    if (filters.status) query.append('status', filters.status);
 
-    fetch(`http://localhost:8000/api/dashboard?${params.toString()}`)
+    fetch(`http://127.0.0.1:8000/api/dashboard?${query.toString()}`)
       .then((res) => res.json())
-      .then((dashboardData) => {
-        setData(dashboardData);
+      .then((d) => {
+        setData(d);
         setLoading(false);
       })
       .catch((err) => {
-        console.error('Error loading dashboard:', err);
+        console.error('Failed to load dashboard:', err);
         setLoading(false);
       });
-  }, [filters, reloadTrigger]);
+  }, [filters]);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'metrics' | 'routers') => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
+  const handleFileUpload = async (type: 'metrics' | 'routers', file: File) => {
     setUploadStatus(null);
-
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const res = await fetch(`http://localhost:8000/api/upload/${type}`, {
+      const res = await fetch(`http://127.0.0.1:8000/api/upload/${type}`, {
         method: 'POST',
         body: formData,
       });
-
       const result = await res.json();
       if (res.ok) {
-        setUploadStatus({ success: true, message: result.message });
-        setReloadTrigger((prev) => prev + 1); // Trigger data reload
+        setUploadStatus({ success: true, message: `Successfully updated ${type} telemetry.` });
       } else {
-        setUploadStatus({ success: false, message: result.detail || 'Upload failed' });
+        setUploadStatus({ success: false, message: result.detail || 'Upload failed.' });
       }
-    } catch (err) {
-      console.error(err);
-      setUploadStatus({ success: false, message: 'Network error occurred during upload.' });
-    } finally {
-      setUploading(false);
-      // Reset input value so same file can be uploaded again
-      e.target.value = '';
+    } catch (err: any) {
+      setUploadStatus({ success: false, message: err.message || 'Error connecting to upload API.' });
     }
   };
 
   if (loading || !data) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+      <div className="py-24 text-center">
+        <div className="animate-spin text-cyan-400 text-3xl mb-3">⟳</div>
+        <p className="text-sm text-gray-400">Loading Network Health Dashboard...</p>
       </div>
     );
   }
 
-  const { summary, worst_routers, building_distribution, firmware_distribution, status_distribution } = data;
+  const { summary, worst_routers } = data;
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* 1. Header KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {/* Total Routers */}
-        <div className="glass-panel p-4 flex items-center gap-4">
-          <div className="bg-slate-800/80 p-3 rounded-lg text-slate-300">
-            <ClipboardList size={24} />
+    <div className="space-y-6">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="glass-card p-4 rounded-xl border border-white/10">
+          <div className="flex items-center justify-between text-gray-400 text-xs mb-1">
+            <span>Total Units</span>
+            <Activity className="h-4 w-4 text-cyan-400" />
           </div>
-          <div>
-            <div className="text-xs text-slate-400 font-medium">Total Routers</div>
-            <div className="text-2xl font-bold text-slate-100">{summary.total_routers}</div>
-          </div>
+          <div className="text-2xl font-bold font-mono text-white">{summary.total_routers}</div>
         </div>
 
-        {/* Healthy */}
-        <div className="glass-panel p-4 flex items-center gap-4">
-          <div className="bg-emerald-500/10 p-3 rounded-lg text-emerald-400">
-            <Heart size={24} />
+        <div className="glass-card p-4 rounded-xl border border-emerald-500/30 bg-emerald-950/20">
+          <div className="flex items-center justify-between text-emerald-300 text-xs mb-1">
+            <span>Healthy (80-100)</span>
+            <Heart className="h-4 w-4 text-emerald-400" />
           </div>
-          <div>
-            <div className="text-xs text-slate-400 font-medium">Healthy</div>
-            <div className="text-2xl font-bold text-emerald-400">{summary.healthy_count}</div>
-          </div>
+          <div className="text-2xl font-bold font-mono text-emerald-400">{summary.healthy_count}</div>
         </div>
 
-        {/* Watch */}
-        <div className="glass-panel p-4 flex items-center gap-4">
-          <div className="bg-amber-500/10 p-3 rounded-lg text-amber-400">
-            <Activity size={24} />
+        <div className="glass-card p-4 rounded-xl border border-amber-500/30 bg-amber-950/20">
+          <div className="flex items-center justify-between text-amber-300 text-xs mb-1">
+            <span>Watch / Mod</span>
+            <ClipboardList className="h-4 w-4 text-amber-400" />
           </div>
-          <div>
-            <div className="text-xs text-slate-400 font-medium">Watch</div>
-            <div className="text-2xl font-bold text-amber-400">{summary.watch_count}</div>
-          </div>
+          <div className="text-2xl font-bold font-mono text-amber-300">{summary.watch_count}</div>
         </div>
 
-        {/* At Risk */}
-        <div className="glass-panel p-4 flex items-center gap-4">
-          <div className="bg-orange-500/10 p-3 rounded-lg text-orange-400">
-            <AlertTriangle size={24} />
+        <div className="glass-card p-4 rounded-xl border border-rose-500/30 bg-rose-950/20">
+          <div className="flex items-center justify-between text-rose-300 text-xs mb-1">
+            <span>Critical (&lt; 40)</span>
+            <ShieldAlert className="h-4 w-4 text-rose-400" />
           </div>
-          <div>
-            <div className="text-xs text-slate-400 font-medium">At Risk</div>
-            <div className="text-2xl font-bold text-orange-400">{summary.at_risk_count}</div>
-          </div>
-        </div>
-
-        {/* Critical */}
-        <div className="glass-panel p-4 flex items-center gap-4 col-span-2 md:col-span-1">
-          <div className="bg-rose-500/10 p-3 rounded-lg text-rose-400">
-            <ShieldAlert size={24} />
-          </div>
-          <div>
-            <div className="text-xs text-slate-400 font-medium">Critical</div>
-            <div className="text-2xl font-bold text-rose-400">{summary.critical_count}</div>
-          </div>
+          <div className="text-2xl font-bold font-mono text-rose-400">{summary.critical_count}</div>
         </div>
       </div>
 
-      {/* Live Telemetry Upload Panel */}
-      <div className="glass-panel p-5 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-900/20 border-slate-800/80">
-        <div className="flex flex-col gap-1">
-          <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
-            <Upload size={16} className="text-emerald-400" />
-            Live Telemetry Data Intake
-          </h3>
-          <p className="text-xs text-slate-400">
-            Upload new telemetry CSV (metrics) or device lists (routers) to recalculate campus-wide health scores.
-          </p>
+      {/* CSV Intake Panel */}
+      <div className="glass-card p-4 rounded-xl border border-white/10 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Upload className="h-4 w-4 text-cyan-400" />
+          <span className="text-xs font-bold text-white uppercase tracking-wider">Live CSV Telemetry Intake</span>
         </div>
-
-        <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-          {/* Upload Status Banner */}
-          {uploadStatus && (
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border ${uploadStatus.success ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20'}`}>
-              {uploadStatus.success ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
-              <span className="max-w-[200px] truncate" title={uploadStatus.message}>{uploadStatus.message}</span>
-            </div>
-          )}
-
-          <div className="flex gap-2">
-            {/* Upload Metrics Button */}
-            <label className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${uploading ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed' : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700 hover:text-slate-100'}`}>
-              <Upload size={14} />
-              <span>Upload Metrics CSV</span>
-              <input 
-                type="file" 
-                accept=".csv" 
-                onChange={(e) => handleFileUpload(e, 'metrics')} 
-                disabled={uploading} 
-                className="hidden" 
-              />
-            </label>
-
-            {/* Upload Routers Button */}
-            <label className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${uploading ? 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed' : 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700 hover:text-slate-100'}`}>
-              <Upload size={14} />
-              <span>Upload Routers CSV</span>
-              <input 
-                type="file" 
-                accept=".csv" 
-                onChange={(e) => handleFileUpload(e, 'routers')} 
-                disabled={uploading} 
-                className="hidden" 
-              />
-            </label>
+        <div className="flex items-center gap-2">
+          <label className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-gray-300 border border-white/10 cursor-pointer">
+            Upload metrics.csv
+            <input type="file" accept=".csv" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileUpload('metrics', e.target.files[0])} />
+          </label>
+          <label className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-mono text-gray-300 border border-white/10 cursor-pointer">
+            Upload routers.csv
+            <input type="file" accept=".csv" className="hidden" onChange={(e) => e.target.files?.[0] && handleFileUpload('routers', e.target.files[0])} />
+          </label>
+        </div>
+        {uploadStatus && (
+          <div className={`text-xs w-full ${uploadStatus.success ? 'text-emerald-400' : 'text-rose-400'}`}>
+            {uploadStatus.message}
           </div>
-        </div>
+        )}
       </div>
 
-      {/* 2. Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Status Distribution Pie Chart */}
-        <div className="glass-panel p-5 flex flex-col gap-4">
-          <h3 className="text-sm font-semibold text-slate-300">Health Score Distribution</h3>
-          <div className="h-64 flex items-center justify-center">
-            {summary.total_routers === 0 ? (
-              <span className="text-sm text-slate-500">No data available for cohort</span>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={status_distribution.filter((d) => d.value > 0)}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {status_distribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={STATUS_COLORS[entry.name as keyof typeof STATUS_COLORS]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{ backgroundColor: '#0f1322', borderColor: '#1e2538', color: '#f1f5f9' }}
-                  />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+      {/* Worst 10 Table */}
+      <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+        <div className="p-4 border-b border-white/10 font-bold text-xs uppercase tracking-wider text-white">
+          Degraded Routers Requiring Inspection
         </div>
-
-        {/* Building Critical Rate Bar Chart */}
-        <div className="glass-panel p-5 flex flex-col gap-4">
-          <h3 className="text-sm font-semibold text-slate-300">Critical Routers by Building</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={building_distribution.slice(0, 5)} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="building" stroke="#64748b" fontSize={10} tickFormatter={(v) => v.replace('-', ' ')} />
-                <YAxis stroke="#64748b" fontSize={10} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#0f1322', borderColor: '#1e2538', color: '#f1f5f9' }}
-                />
-                <Legend />
-                <Bar name="Critical" dataKey="critical" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                <Bar name="Healthy / Watch" dataKey="healthy" fill="#10b981" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Firmware Critical Rate Bar Chart */}
-        <div className="glass-panel p-5 flex flex-col gap-4">
-          <h3 className="text-sm font-semibold text-slate-300">Critical Routers by Firmware</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={firmware_distribution} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="firmware" stroke="#64748b" fontSize={10} />
-                <YAxis stroke="#64748b" fontSize={10} allowDecimals={false} />
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#0f1322', borderColor: '#1e2538', color: '#f1f5f9' }}
-                />
-                <Legend />
-                <Bar name="Critical" dataKey="critical" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                <Bar name="Healthy / Watch" dataKey="healthy" fill="#10b981" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Worst Performing Routers Table */}
-      <div className="glass-panel p-5 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-slate-300">Worst Performing Routers (Action Required)</h3>
-          <span className="text-xs text-slate-400">Showing top 10 routers sorted by lowest health score</span>
-        </div>
-
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-slate-800 text-xs text-slate-400 font-semibold uppercase bg-slate-900/40">
-                <th className="py-3 px-4">Rank</th>
-                <th className="py-3 px-4">Router ID</th>
-                <th className="py-3 px-4">Health Score</th>
-                <th className="py-3 px-4">Building</th>
-                <th className="py-3 px-4">Latency</th>
-                <th className="py-3 px-4">Packet Loss</th>
-                <th className="py-3 px-4">Disconnects</th>
-                <th className="py-3 px-4">Signal</th>
-                <th className="py-3 px-4">Connected</th>
-                <th className="py-3 px-4">Firmware</th>
+              <tr>
+                <th>Router ID</th>
+                <th>Building</th>
+                <th>Health Score</th>
+                <th>Status</th>
+                <th>Latency (ms)</th>
+                <th>Packet Loss (%)</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {worst_routers.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="py-8 text-center text-sm text-slate-500">
-                    No matching unhealthy routers found for these filters.
+              {worst_routers.map((r) => (
+                <tr key={r.router_id} onClick={() => onRouterSelect(r.router_id)} className="cursor-pointer hover:bg-white/5">
+                  <td className="font-mono font-bold text-white">{r.router_id}</td>
+                  <td>{r.building}</td>
+                  <td className="font-mono font-bold text-rose-400">{r.health_score}</td>
+                  <td><span className="badge badge-critical">{r.status}</span></td>
+                  <td>{r.latency}ms</td>
+                  <td>{r.packet_loss}%</td>
+                  <td>
+                    <button className="text-cyan-400 hover:underline">Inspect &rarr;</button>
                   </td>
                 </tr>
-              ) : (
-                worst_routers.map((r) => (
-                  <tr
-                    key={r.router_id}
-                    onClick={() => onRouterSelect(r.router_id)}
-                    className="border-b border-slate-800/60 hover:bg-slate-900/35 transition-colors cursor-pointer text-sm"
-                  >
-                    <td className="py-3.5 px-4 text-slate-400 font-medium">{r.rank}</td>
-                    <td className="py-3.5 px-4 font-semibold text-emerald-400 hover:underline">{r.router_id}</td>
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="w-2.5 h-2.5 rounded-full"
-                          style={{ backgroundColor: STATUS_COLORS[r.status as keyof typeof STATUS_COLORS] }}
-                        ></span>
-                        <span className="font-medium text-slate-200">{r.health_score}</span>
-                        <span className="text-xs text-slate-400">({r.status})</span>
-                      </div>
-                    </td>
-                    <td className="py-3.5 px-4 text-slate-300">{r.building.replace('-', ' ')}</td>
-                    <td className="py-3.5 px-4 text-slate-300">{r.latency.toFixed(1)} ms</td>
-                    <td className="py-3.5 px-4 text-slate-300">{r.packet_loss.toFixed(2)}%</td>
-                    <td className="py-3.5 px-4 text-slate-300">{r.disconnects}</td>
-                    <td className="py-3.5 px-4 text-slate-300">{r.signal.toFixed(1)} dBm</td>
-                    <td className="py-3.5 px-4 text-slate-300">{r.connected_devices}</td>
-                    <td className="py-3.5 px-4 text-xs text-slate-400 font-mono">{r.firmware}</td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
