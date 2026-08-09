@@ -326,17 +326,17 @@ function App() {
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-3.5 flex flex-col gap-1.5">
-            <div className="px-2.5 py-1 text-[10px] uppercase font-bold text-slate-500 tracking-wider">Fleet Management</div>
+          <nav className="p-3.5 flex flex-col gap-2">
+            <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-500 tracking-wider">Fleet Management</div>
 
             {/* Dashboard Link */}
             <button
               type="button"
               onClick={() => navigateToPage('dashboard')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 border ${
                 currentPage === 'dashboard'
-                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
-                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+                  ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent border-emerald-500/40 text-emerald-300 shadow-lg shadow-emerald-500/10'
+                  : 'bg-slate-950/40 border-slate-800/40 text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 hover:border-slate-700/50'
               }`}
             >
               <LayoutDashboard size={16} className={`shrink-0 ${currentPage === 'dashboard' ? 'text-emerald-400' : 'text-slate-400'}`} />
@@ -347,10 +347,10 @@ function App() {
             <button
               type="button"
               onClick={() => navigateToPage('routers')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 border ${
                 currentPage === 'routers' || currentPage === 'router-detail'
-                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
-                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+                  ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent border-emerald-500/40 text-emerald-300 shadow-lg shadow-emerald-500/10'
+                  : 'bg-slate-950/40 border-slate-800/40 text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 hover:border-slate-700/50'
               }`}
             >
               <Router size={16} className={`shrink-0 ${currentPage === 'routers' || currentPage === 'router-detail' ? 'text-emerald-400' : 'text-slate-400'}`} />
@@ -361,10 +361,10 @@ function App() {
             <button
               type="button"
               onClick={() => navigateToPage('copilot')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 border ${
                 currentPage === 'copilot'
-                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
-                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+                  ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent border-emerald-500/40 text-emerald-300 shadow-lg shadow-emerald-500/10'
+                  : 'bg-slate-950/40 border-slate-800/40 text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 hover:border-slate-700/50'
               }`}
             >
               <Cpu size={16} className={`shrink-0 ${currentPage === 'copilot' ? 'text-emerald-400' : 'text-slate-400'}`} />
@@ -375,10 +375,10 @@ function App() {
             <button
               type="button"
               onClick={() => navigateToPage('analytics')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 border ${
                 currentPage === 'analytics'
-                  ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
-                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+                  ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent border-emerald-500/40 text-emerald-300 shadow-lg shadow-emerald-500/10'
+                  : 'bg-slate-950/40 border-slate-800/40 text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 hover:border-slate-700/50'
               }`}
             >
               <BarChart4 size={16} className={`shrink-0 ${currentPage === 'analytics' ? 'text-emerald-400' : 'text-slate-400'}`} />
@@ -386,17 +386,17 @@ function App() {
             </button>
 
             {/* Divider */}
-            <div className="my-1.5 border-t border-slate-800/60"></div>
-            <div className="px-2.5 py-1 text-[10px] uppercase font-bold text-cyan-400 tracking-wider">Predictive ML Suite</div>
+            <div className="my-2 border-t border-slate-800/60"></div>
+            <div className="px-3 py-1 text-[10px] uppercase font-bold text-cyan-400 tracking-wider">Predictive ML Suite</div>
 
             {/* Predictive Operations Link */}
             <button
               type="button"
               onClick={() => navigateToPage('predictive-ops')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 border ${
                 currentPage === 'predictive-ops'
-                  ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-md shadow-cyan-500/5'
-                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+                  ? 'bg-gradient-to-r from-cyan-500/20 via-cyan-500/10 to-transparent border-cyan-500/40 text-cyan-300 shadow-lg shadow-cyan-500/10'
+                  : 'bg-slate-950/40 border-slate-800/40 text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 hover:border-slate-700/50'
               }`}
             >
               <Activity size={16} className={`shrink-0 ${currentPage === 'predictive-ops' ? 'text-cyan-400' : 'text-slate-400'}`} />
@@ -407,10 +407,10 @@ function App() {
             <button
               type="button"
               onClick={() => navigateToPage('predictive-patterns')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 border ${
                 currentPage === 'predictive-patterns'
-                  ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-md shadow-cyan-500/5'
-                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+                  ? 'bg-gradient-to-r from-cyan-500/20 via-cyan-500/10 to-transparent border-cyan-500/40 text-cyan-300 shadow-lg shadow-cyan-500/10'
+                  : 'bg-slate-950/40 border-slate-800/40 text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 hover:border-slate-700/50'
               }`}
             >
               <ScatterChart size={16} className={`shrink-0 ${currentPage === 'predictive-patterns' ? 'text-cyan-400' : 'text-slate-400'}`} />
@@ -421,10 +421,10 @@ function App() {
             <button
               type="button"
               onClick={() => navigateToPage('predictive-model')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 border ${
                 currentPage === 'predictive-model'
-                  ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-md shadow-cyan-500/5'
-                  : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
+                  ? 'bg-gradient-to-r from-cyan-500/20 via-cyan-500/10 to-transparent border-cyan-500/40 text-cyan-300 shadow-lg shadow-cyan-500/10'
+                  : 'bg-slate-950/40 border-slate-800/40 text-slate-400 hover:text-slate-100 hover:bg-slate-900/60 hover:border-slate-700/50'
               }`}
             >
               <Sliders size={16} className={`shrink-0 ${currentPage === 'predictive-model' ? 'text-cyan-400' : 'text-slate-400'}`} />
