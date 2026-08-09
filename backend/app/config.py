@@ -3,14 +3,26 @@
 import os
 
 # Port and server options
-PORT = 8000
+PORT = int(os.environ.get("PORT", 8000))
 HOST = "0.0.0.0"
 
-# Files path
-DATA_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-ROUTERS_CSV = os.path.join(DATA_DIR, "routers(in).csv")
-METRICS_CSV = os.path.join(DATA_DIR, "metrics(in).csv")
-COMPLAINTS_CSV = os.path.join(DATA_DIR, "COMPLA~1(in).csv")
+# Files path resolution (checks workspace root and data/raw)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+def resolve_data_file(filename: str) -> str:
+    # 1. Check workspace root
+    path1 = os.path.join(PROJECT_ROOT, filename)
+    if os.path.exists(path1):
+        return path1
+    # 2. Check data/raw
+    path2 = os.path.join(PROJECT_ROOT, "data", "raw", filename)
+    if os.path.exists(path2):
+        return path2
+    return path1
+
+ROUTERS_CSV = resolve_data_file("routers(in).csv")
+METRICS_CSV = resolve_data_file("metrics(in).csv")
+COMPLAINTS_CSV = resolve_data_file("COMPLA~1(in).csv")
 
 # Minimum size for firmware/building peer cohort analysis
 MIN_COHORT_SIZE = 3

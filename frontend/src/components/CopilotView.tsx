@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Cpu, User, Terminal } from 'lucide-react';
+import { API_BASE_URL } from '../api/config';
 
 interface Message {
   id: string;
@@ -48,7 +49,7 @@ export const CopilotView: React.FC = () => {
     setInput('');
     setLoading(true);
 
-    fetch('http://localhost:8000/api/copilot', {
+    fetch(`${API_BASE_URL}/copilot`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

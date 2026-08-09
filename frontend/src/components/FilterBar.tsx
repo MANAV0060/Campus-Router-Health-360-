@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Filter, RotateCcw } from 'lucide-react';
+import { API_BASE_URL } from '../api/config';
 
 interface FilterBarProps {
   onFilterChange: (filters: {
@@ -24,7 +25,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ onFilterChange, activeFilt
 
   useEffect(() => {
     // Fetch unique buildings
-    fetch('http://localhost:8000/api/buildings')
+    fetch(`${API_BASE_URL}/buildings`)
       .then((res) => res.json())
       .then((data) => {
         if (data.buildings) setBuildings(data.buildings);
@@ -32,7 +33,7 @@ export const FilterBar: React.FC<FilterBarProps> = ({ onFilterChange, activeFilt
       .catch((err) => console.error('Error fetching buildings:', err));
 
     // Fetch unique firmwares
-    fetch('http://localhost:8000/api/firmware')
+    fetch(`${API_BASE_URL}/firmware`)
       .then((res) => res.json())
       .then((data) => {
         if (data.firmware) setFirmwares(data.firmware);

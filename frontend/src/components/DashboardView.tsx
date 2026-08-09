@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Activity, ShieldAlert, Heart, ClipboardList, Upload } from 'lucide-react';
+import { API_BASE_URL } from '../api/config';
 
 interface RouterSummary {
   rank: number;
@@ -53,7 +54,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ filters, onRouterS
     if (filters.model) query.append('model', filters.model);
     if (filters.status) query.append('status', filters.status);
 
-    fetch(`http://127.0.0.1:8000/api/dashboard?${query.toString()}`)
+    fetch(`${API_BASE_URL}/dashboard?${query.toString()}`)
       .then((res) => res.json())
       .then((d) => {
         setData(d);
@@ -71,7 +72,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ filters, onRouterS
     formData.append('file', file);
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/upload/${type}`, {
+      const res = await fetch(`${API_BASE_URL}/upload/${type}`, {
         method: 'POST',
         body: formData,
       });
