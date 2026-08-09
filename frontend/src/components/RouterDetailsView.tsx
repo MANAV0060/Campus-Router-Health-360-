@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Activity, ArrowLeft } from 'lucide-react';
+import { API_BASE_URL } from '../api/config';
 
 interface RouterDetailsViewProps {
   routerId: string;
@@ -12,7 +13,7 @@ export const RouterDetailsView: React.FC<RouterDetailsViewProps> = ({ routerId, 
 
   useEffect(() => {
     setLoading(true);
-    fetch(`http://127.0.0.1:8000/api/routers/${encodeURIComponent(routerId)}`)
+    fetch(`${API_BASE_URL}/routers/${encodeURIComponent(routerId)}`)
       .then((res) => res.json())
       .then((d) => {
         setData(d);

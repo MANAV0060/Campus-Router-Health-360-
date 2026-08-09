@@ -14,6 +14,7 @@ import { FleetPatternsSection } from './components/FleetPatternsSection';
 import { ModelTrainingPage } from './components/ModelTrainingPage';
 import { RouterDetailModal } from './components/RouterDetailModal';
 import { fetchFleetKpis, fetchRoutersRanking } from './api/client';
+import { API_BASE_URL } from './api/config';
 import type { FleetKpis as PredictiveKpis, RouterSummary as PredictiveRouterSummary } from './types';
 
 type Page = 'dashboard' | 'routers' | 'router-detail' | 'copilot' | 'analytics' | 'predictive-ops' | 'predictive-patterns' | 'predictive-model';
@@ -27,7 +28,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ onRouterSelect }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/analytics')
+    fetch(`${API_BASE_URL}/analytics`)
       .then((res) => res.json())
       .then((data) => {
         setAnalytics(data);
@@ -276,7 +277,7 @@ function App() {
 
   // Periodically fetch general alerts (e.g. number of critical routers)
   useEffect(() => {
-    fetch('http://localhost:8000/api/dashboard')
+    fetch(`${API_BASE_URL}/dashboard`)
       .then((res) => res.json())
       .then((data) => {
         const critCount = data.summary.critical_count;
@@ -310,124 +311,124 @@ function App() {
   return (
     <div className="min-h-screen bg-bg-dark text-slate-100 flex font-sans">
       {/* 1. Sidebar Panel */}
-      <aside className="w-64 border-r border-border-dark bg-[#0a0d17]/95 flex flex-col justify-between shrink-0 h-screen sticky top-0">
+      <aside className="w-72 border-r border-border-dark bg-[#0a0d17]/95 flex flex-col justify-between shrink-0 h-screen sticky top-0">
         <div className="flex flex-col">
           {/* App Logo */}
-          <div className="p-6 border-b border-border-dark flex items-center gap-3">
-            <div className="relative">
+          <div className="p-5 border-b border-border-dark flex items-center gap-3">
+            <div className="relative shrink-0">
               <Network className="text-emerald-400" size={24} />
               <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-500 pulse-healthy-glow"></span>
             </div>
-            <div>
-              <span className="font-bold text-slate-100 text-sm tracking-wide">NetSentinel</span>
-              <div className="text-[10px] text-slate-500 font-medium">Campus Router 360</div>
+            <div className="min-w-0">
+              <span className="font-bold text-slate-100 text-sm tracking-wide block truncate">NetSentinel</span>
+              <div className="text-[10px] text-slate-500 font-medium truncate">Campus Router 360</div>
             </div>
           </div>
 
           {/* Navigation Links */}
-          <nav className="p-4 flex flex-col gap-2">
-            <div className="px-3 py-1 text-[10px] uppercase font-bold text-slate-500 tracking-wider">Fleet Management</div>
+          <nav className="p-3.5 flex flex-col gap-1.5">
+            <div className="px-2.5 py-1 text-[10px] uppercase font-bold text-slate-500 tracking-wider">Fleet Management</div>
 
             {/* Dashboard Link */}
             <button
               type="button"
               onClick={() => navigateToPage('dashboard')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
                 currentPage === 'dashboard'
                   ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
                   : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
               }`}
             >
-              <LayoutDashboard size={16} className={currentPage === 'dashboard' ? 'text-emerald-400' : 'text-slate-400'} />
-              <span>Operations Dashboard</span>
+              <LayoutDashboard size={16} className={`shrink-0 ${currentPage === 'dashboard' ? 'text-emerald-400' : 'text-slate-400'}`} />
+              <span className="truncate">Operations Dashboard</span>
             </button>
 
             {/* Router Explorer Link */}
             <button
               type="button"
               onClick={() => navigateToPage('routers')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
                 currentPage === 'routers' || currentPage === 'router-detail'
                   ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
                   : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
               }`}
             >
-              <Router size={16} className={currentPage === 'routers' || currentPage === 'router-detail' ? 'text-emerald-400' : 'text-slate-400'} />
-              <span>Router Explorer</span>
+              <Router size={16} className={`shrink-0 ${currentPage === 'routers' || currentPage === 'router-detail' ? 'text-emerald-400' : 'text-slate-400'}`} />
+              <span className="truncate">Router Explorer</span>
             </button>
 
             {/* AI Copilot Link */}
             <button
               type="button"
               onClick={() => navigateToPage('copilot')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
                 currentPage === 'copilot'
                   ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
                   : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
               }`}
             >
-              <Cpu size={16} className={currentPage === 'copilot' ? 'text-emerald-400' : 'text-slate-400'} />
-              <span>AI Copilot Console</span>
+              <Cpu size={16} className={`shrink-0 ${currentPage === 'copilot' ? 'text-emerald-400' : 'text-slate-400'}`} />
+              <span className="truncate">AI Copilot Console</span>
             </button>
 
             {/* Analytics Link */}
             <button
               type="button"
               onClick={() => navigateToPage('analytics')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
                 currentPage === 'analytics'
                   ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300 shadow-md shadow-emerald-500/5'
                   : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
               }`}
             >
-              <BarChart4 size={16} className={currentPage === 'analytics' ? 'text-emerald-400' : 'text-slate-400'} />
-              <span>Fleet Analytics</span>
+              <BarChart4 size={16} className={`shrink-0 ${currentPage === 'analytics' ? 'text-emerald-400' : 'text-slate-400'}`} />
+              <span className="truncate">Fleet Analytics</span>
             </button>
 
             {/* Divider */}
-            <div className="my-2 border-t border-slate-800/60"></div>
-            <div className="px-3 py-1 text-[10px] uppercase font-bold text-cyan-400 tracking-wider">Predictive ML Suite</div>
+            <div className="my-1.5 border-t border-slate-800/60"></div>
+            <div className="px-2.5 py-1 text-[10px] uppercase font-bold text-cyan-400 tracking-wider">Predictive ML Suite</div>
 
             {/* Predictive Operations Link */}
             <button
               type="button"
               onClick={() => navigateToPage('predictive-ops')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
                 currentPage === 'predictive-ops'
                   ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-md shadow-cyan-500/5'
                   : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
               }`}
             >
-              <Activity size={16} className={currentPage === 'predictive-ops' ? 'text-cyan-400' : 'text-slate-400'} />
-              <span>Predictive Operations</span>
+              <Activity size={16} className={`shrink-0 ${currentPage === 'predictive-ops' ? 'text-cyan-400' : 'text-slate-400'}`} />
+              <span className="truncate">Predictive Operations</span>
             </button>
 
             {/* Systemic Patterns Link */}
             <button
               type="button"
               onClick={() => navigateToPage('predictive-patterns')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
                 currentPage === 'predictive-patterns'
                   ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-md shadow-cyan-500/5'
                   : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
               }`}
             >
-              <ScatterChart size={16} className={currentPage === 'predictive-patterns' ? 'text-cyan-400' : 'text-slate-400'} />
-              <span>Systemic Patterns</span>
+              <ScatterChart size={16} className={`shrink-0 ${currentPage === 'predictive-patterns' ? 'text-cyan-400' : 'text-slate-400'}`} />
+              <span className="truncate">Systemic Patterns</span>
             </button>
 
             {/* XGBoost Performance Link */}
             <button
               type="button"
               onClick={() => navigateToPage('predictive-model')}
-              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all border ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all border ${
                 currentPage === 'predictive-model'
                   ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300 shadow-md shadow-cyan-500/5'
                   : 'bg-slate-900/40 border-slate-800/60 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 hover:border-slate-700/60'
               }`}
             >
-              <Sliders size={16} className={currentPage === 'predictive-model' ? 'text-cyan-400' : 'text-slate-400'} />
-              <span>XGBoost Diagnostics</span>
+              <Sliders size={16} className={`shrink-0 ${currentPage === 'predictive-model' ? 'text-cyan-400' : 'text-slate-400'}`} />
+              <span className="truncate">XGBoost Diagnostics</span>
             </button>
           </nav>
         </div>
