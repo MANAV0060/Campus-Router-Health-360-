@@ -58,11 +58,13 @@ export const CopilotView: React.FC = () => {
     })
       .then((res) => res.json())
       .then((data) => {
+        const responseText = data.answer || data.response || (typeof data === 'string' ? data : 'No response generated.');
+        const responseSource = data.source || (data.router_id ? `Predictive Model (${data.router_id})` : 'NetSentinel AI Copilot');
         const copilotMsg: Message = {
           id: (Date.now() + 1).toString(),
-          text: data.response,
+          text: responseText,
           sender: 'copilot',
-          source: data.source,
+          source: responseSource,
         };
         setMessages((prev) => [...prev, copilotMsg]);
         setLoading(false);

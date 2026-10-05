@@ -98,6 +98,13 @@ def get_routers(
         "routers": result_list
     }
 
+@router.get("/routers/{router_id}/evidence")
+def get_evidence_endpoint(router_id: str):
+    evidence_data = get_router_evidence(router_id.strip())
+    if not evidence_data:
+        raise HTTPException(status_code=404, detail=f"Evidence for router {router_id} not found.")
+    return evidence_data
+
 @router.get("/routers/{router_id}")
 def get_router_detail(router_id: str):
     # Check if predictive router service has detailed 360 diagnostic

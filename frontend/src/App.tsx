@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { LayoutDashboard, Router, Cpu, BarChart4, Network, Bell, HelpCircle, Activity, ScatterChart, Sliders } from 'lucide-react';
 import { FilterBar } from './components/FilterBar';
 import { DashboardView } from './components/DashboardView';
@@ -188,7 +188,7 @@ const PredictiveOpsView: React.FC<PredictiveOpsViewProps> = ({ onRouterSelect })
   const [sortBy, setSortBy] = useState<string>('priority');
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const [kpiData, rankingData] = await Promise.all([
@@ -207,11 +207,11 @@ const PredictiveOpsView: React.FC<PredictiveOpsViewProps> = ({ onRouterSelect })
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterStatus, filterBuilding, filterRisk, sortBy]);
 
   useEffect(() => {
     loadData();
-  }, [filterStatus, filterBuilding, filterRisk, sortBy]);
+  }, [loadData]);
 
   const filteredRouters = routers.filter((r) => {
     if (!searchTerm) return true;

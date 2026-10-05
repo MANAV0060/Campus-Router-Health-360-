@@ -1,0 +1,6 @@
+{
+  "name": "NetSentinel — Campus Router Health 360",
+  "description": "Campus router health monitoring dashboard with real-time telemetry, baseline analysis, prioritized IT queue, and AI Copilot.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
