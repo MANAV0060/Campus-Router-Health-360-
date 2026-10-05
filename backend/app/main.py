@@ -9,6 +9,7 @@ from app.api.routers import router as routers_router
 from app.api.analytics import router as analytics_router
 from app.api.copilot import router as copilot_router
 from app.api.upload import router as upload_router
+from app.api.iot import router as iot_router
 from app.services.data_loader import reload_data
 from app.config import HOST, PORT
 
@@ -44,6 +45,7 @@ app.include_router(routers_router, prefix="/api", tags=["Routers"])
 app.include_router(analytics_router, prefix="/api", tags=["Analytics"])
 app.include_router(copilot_router, prefix="/api", tags=["Copilot"])
 app.include_router(upload_router, prefix="/api", tags=["Upload"])
+app.include_router(iot_router, prefix="/api", tags=["IoT Simulator & Digital Twin"])
 
 @app.get("/")
 def read_root():

@@ -423,3 +423,92 @@ export async function queryCopilotML(question: string, routerId?: string): Promi
   if (!res.ok) throw new Error(`HTTP error ${res.status}`);
   return res.json();
 }
+
+
+// --- IoT Fleet Simulator & Digital Twin API ---
+
+export async function fetchIoTSummary(): Promise<IoTSummary> {
+  const res = await fetch(`${BASE_URL}/iot/summary`);
+  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+  return res.json();
+}
+
+export async function fetchIoTNodes(building?: string, health?: string): Promise<DigitalTwinNode[]> {
+  const params = new URLSearchParams();
+  if (building && building !== 'All') params.append('building', building);
+  if (health && health !== 'All') params.append('health', health);
+  const queryStr = params.toString() ? `?${params.toString()}` : '';
+  const res = await fetch(`${BASE_URL}/iot/nodes${queryStr}`);
+  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+  return res.json();
+}
+
+export async function fetchIoTNodeDetail(routerId: string): Promise<DigitalTwinNode & { senml: SenMLRecord[]; dtdl_ref: string }> {
+  const res = await fetch(`${BASE_URL}/iot/nodes/${encodeURIComponent(routerId)}`);
+  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+  return res.json();
+}
+
+export async function fetchRecentSenML(limit = 40): Promise<SenMLRecord[]> {
+  const res = await fetch(`${BASE_URL}/iot/senml/recent?limit=${limit}`);
+  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+  return res.json();
+}
+
+export async function fetchIoTDtdl(): Promise<any> {
+  const res = await fetch(`${BASE_URL}/iot/dtdl`);
+  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+  return res.json();
+}
+
+export async function updateIoTControl(params: {
+  is_running?: boolean;
+  speed_multiplier?: number;
+  trigger_step?: boolean;
+}): Promise<any> {
+  const res = await fetch(`${BASE_URL}/iot/control`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+  return res.json();
+}
+
+export async function injectIoTFault(
+  routerId: string,
+  faultType: string,
+  severity = 0.8
+): Promise<any> {
+  const res = await fetch(`${BASE_URL}/iot/faults/inject`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ router_id: routerId, fault_type: faultType, severity }),
+  });
+  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+  return res.json();
+}
+
+export async function clearIoTFaults(routerId?: string): Promise<any> {
+  const res = await fetch(`${BASE_URL}/iot/faults/clear`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ router_id: routerId }),
+  });
+  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+  return res.json();
+}
+
+export async function actuateIoTNode(
+  routerId: string,
+  command: string,
+  params?: Record<string, any>
+): Promise<any> {
+  const res = await fetch(`${BASE_URL}/iot/actuate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ router_id: routerId, command, params }),
+  });
+  if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+  return res.json();
+}

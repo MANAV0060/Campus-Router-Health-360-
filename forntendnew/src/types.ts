@@ -346,3 +346,66 @@ export interface ModelMetricsResponse {
   roc_curve: Array<{ fpr: number; tpr: number }>;
   pr_curve: Array<{ recall: number; precision: number }>;
 }
+
+
+// --- IoT Simulator & Digital Twin Types (RFC 8428 & DTDL) ---
+
+export interface IoTSummary {
+  status: 'RUNNING' | 'PAUSED';
+  speed_multiplier: number;
+  tick_count: number;
+  total_nodes: number;
+  healthy_count: number;
+  watch_count: number;
+  critical_count: number;
+  active_fault_count: number;
+  avg_temperature_celsius: number;
+  avg_cpu_load_pct: number;
+  total_power_draw_watts: number;
+  total_connected_iot_clients: number;
+  senml_rate_per_sec: number;
+  standards_compliance: string[];
+}
+
+export interface SenMLRecord {
+  bn?: string;
+  bt?: number;
+  n?: string;
+  u?: string;
+  v?: number | string;
+}
+
+export interface DigitalTwinNode {
+  router_id: string;
+  urn: string;
+  building: string;
+  floor: number;
+  room: number;
+  model: string;
+  firmware: string;
+  ip_address: string;
+  mac_address: string;
+  channel: number;
+  health_status: 'HEALTHY' | 'WATCH' | 'CRITICAL';
+  twin_sync_status: string;
+  active_fault: string | null;
+  fault_severity: number;
+  last_sync_timestamp: number;
+  metrics: {
+    temperature_celsius: number;
+    cpu_load_pct: number;
+    ram_usage_pct: number;
+    power_draw_w: number;
+    latency_ms: number;
+    packet_loss_pct: number;
+    jitter_ms: number;
+    noise_floor_dbm: number;
+    connected_devices: number;
+  };
+  actuation_history: Array<{
+    command: string;
+    timestamp: string;
+    status: string;
+    message?: string;
+  }>;
+}

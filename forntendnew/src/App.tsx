@@ -27,6 +27,8 @@ import { HealthDistributionChart } from './components/HealthDistributionChart';
 import { PredictedDegradationTable } from './components/PredictedDegradationTable';
 import { FleetPatternsSection } from './components/FleetPatternsSection';
 import { ModelTrainingPage } from './components/ModelTrainingPage';
+import { IoTFleetSimulatorView } from './components/IoTFleetSimulatorView';
+import { CampusDigitalTwinView } from './components/CampusDigitalTwinView';
 import { RouterDetailModal } from './components/RouterDetailModal';
 import { Layers, Cpu, Activity } from 'lucide-react';
 
@@ -241,6 +243,16 @@ export default function App() {
 
               {activeTab === 'predictive_model' && (
                 <ModelTrainingPage />
+              )}
+
+              {activeTab === 'iot_simulator' && (
+                <IoTFleetSimulatorView
+                  onSelectRouter={(id) => handleSelectRouterById(id)}
+                />
+              )}
+
+              {activeTab === 'digital_twin' && (
+                <CampusDigitalTwinView />
               )}
             </motion.div>
           </AnimatePresence>

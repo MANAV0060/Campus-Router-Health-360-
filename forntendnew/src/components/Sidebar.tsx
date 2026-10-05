@@ -13,10 +13,12 @@ import {
   X,
   Activity,
   Cpu,
-  Layers
+  Layers,
+  Radio,
+  Network
 } from 'lucide-react';
 
-export type TabType = 'dashboard' | 'explorer' | 'at_risk' | 'analytics' | 'copilot' | 'predictive_ops' | 'predictive_patterns' | 'predictive_model';
+export type TabType = 'dashboard' | 'explorer' | 'at_risk' | 'analytics' | 'copilot' | 'predictive_ops' | 'predictive_patterns' | 'predictive_model' | 'iot_simulator' | 'digital_twin';
 
 interface SidebarProps {
   activeTab: TabType;
@@ -190,6 +192,58 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-600 dark:text-cyan-400' : 'text-gray-400'}`} />
                     <span className="truncate">{item.label}</span>
                   </div>
+                </motion.button>
+              );
+            })}
+          </nav>
+
+          {/* Divider */}
+          <div className="my-4 border-t border-gray-200 dark:border-gray-800/80"></div>
+          
+          <div className="flex items-center justify-between mb-2 px-2">
+            <span className="text-[10px] font-extrabold tracking-widest text-emerald-500 uppercase flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              IOT & DIGITAL TWIN
+            </span>
+            <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold">
+              RFC 8428
+            </span>
+          </div>
+
+          <nav className="space-y-1.5">
+            {[
+              { id: 'iot_simulator' as TabType, label: 'IoT Fleet Simulator', icon: Radio, badge: 'Live', badgeColor: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30' },
+              { id: 'digital_twin' as TabType, label: 'Campus Digital Twin', icon: Network, badge: 'DTDL', badgeColor: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/30' }
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <motion.button
+                  key={item.id}
+                  whileHover={{ x: 3 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    if (onCloseMobile) onCloseMobile();
+                  }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/30 shadow-2xs'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-[#C9CFF2]/30 dark:hover:bg-gray-800/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
+                    <span className="truncate">{item.label}</span>
+                  </div>
+                  {item.badge && (
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border shrink-0 ${item.badgeColor}`}>
+                      {item.badge}
+                    </span>
+                  )}
                 </motion.button>
               );
             })}
