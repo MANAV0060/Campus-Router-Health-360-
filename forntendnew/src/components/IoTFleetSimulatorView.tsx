@@ -1,3 +1,4 @@
+import { VisualIoTSimulatorArena } from './VisualIoTSimulatorArena';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -41,6 +42,7 @@ export const IoTFleetSimulatorView: React.FC<IoTFleetSimulatorViewProps> = ({ on
   const [loading, setLoading] = useState<boolean>(true);
   const [filterBuilding, setFilterBuilding] = useState<string>('All');
   const [filterHealth, setFilterHealth] = useState<string>('All');
+  const [viewMode, setViewMode] = useState<'visual_arena' | 'deck'>('visual_arena');
 
   // Chaos Injection state
   const [selectedTarget, setSelectedTarget] = useState<string>('R-ENG-101');
@@ -147,6 +149,47 @@ export const IoTFleetSimulatorView: React.FC<IoTFleetSimulatorViewProps> = ({ on
 
   return (
     <div className="space-y-6">
+      {/* Top Visual Mode Switcher */}
+      <div className="flex items-center justify-between bg-white dark:bg-[#121829] border border-gray-200 dark:border-gray-800 rounded-2xl p-2 shadow-xs">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setViewMode('visual_arena')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+              viewMode === 'visual_arena'
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span>60 FPS Particle Mesh Visualizer</span>
+          </button>
+
+          <button
+            onClick={() => setViewMode('deck')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+              viewMode === 'deck'
+                ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-md'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            <span>SenML Diagnostics & Tables</span>
+          </button>
+        </div>
+
+        <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-gray-400 px-3">
+          <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
+          <span>LIVE HARDWARE SIMULATOR</span>
+        </div>
+      </div>
+
+      {viewMode === 'visual_arena' ? (
+        <VisualIoTSimulatorArena />
+      ) : (
+        <div className="space-y-6">
       {/* Top Banner Control Deck */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#0d1527] via-[#111c38] to-[#151a30] border border-emerald-500/30 p-6 text-white shadow-xl">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -532,6 +575,8 @@ export const IoTFleetSimulatorView: React.FC<IoTFleetSimulatorViewProps> = ({ on
           </table>
         </div>
       </div>
+        </div>
+      )}
     </div>
   );
 };
