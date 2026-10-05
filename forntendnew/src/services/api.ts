@@ -10,7 +10,10 @@ import {
   RouterDetail,
   FleetPatternsResponse,
   ModelMetricsResponse,
-  CopilotMLResponse
+  CopilotMLResponse,
+  IoTSummary,
+  DigitalTwinNode,
+  SenMLRecord
 } from '../types';
 import {
   INITIAL_ROUTERS,

@@ -18,7 +18,8 @@ import {
   Cpu,
   Layers,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Sliders
 } from 'lucide-react';
 import type { IoTSummary, DigitalTwinNode, SenMLRecord } from '../types';
 import {
